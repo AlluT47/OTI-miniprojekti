@@ -1,7 +1,7 @@
 import java.sql.Connection;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import util.DatabaseConnection;
+import util.Tietokantayhteys;
 
 
 public class Main extends Application {
@@ -11,7 +11,7 @@ public class Main extends Application {
 
 
         try {
-            Connection conn = DatabaseConnection.getConnection();
+            Connection conn = Tietokantayhteys.getConnection();
             System.out.println("Yhteys tietokantaan muodostettu!"); //Tietokantayhteyden testaamiseksi, voi poistaa myöhemmin
             conn.close();
         } catch (Exception e) {

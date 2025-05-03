@@ -12,6 +12,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import util.Tietokantayhteys;
+
+import java.sql.Connection;
 
 public class MainApplication extends Application {
 
@@ -19,11 +22,25 @@ public class MainApplication extends Application {
         launch(args);
     }
 
+
+    public void ConnectToSQL(){
+        try {
+            Connection conn = Tietokantayhteys.getConnection();
+            System.out.println("Yhteys tietokantaan muodostettu!"); //Tietokantayhteyden testaamiseksi, voi poistaa myöhemmin
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
     @Override
     public void start(Stage stage) {
 
-        Pane mainPane = new Pane();
+        ConnectToSQL();
 
+
+        Pane mainPane = new Pane();
 
         /*
         Kirjautuminen

@@ -85,7 +85,7 @@ public class MainApplication extends Application {
 
         //kirjautumis -pane pääpaneen
         mainPane.getChildren().add(logIn);
-        logIn.setVisible(false);
+        logIn.setVisible(true);
 
 
         /*
@@ -422,14 +422,14 @@ public class MainApplication extends Application {
         GridPane cottageInfoGridPane = new GridPane();
 
         Button createReservationButton = new Button("Luo varaus");
-        Button changeReservationButton = new Button("Muuta varausta");
+        Button editReservationButton = new Button("Muuta varausta");
         Button removeReservationButton = new Button("Poista varaus");
-        Button changeCottageInfoButton = new Button("Muuta mökin tietoja");
+        Button editCottageInfoButton = new Button("Muuta mökin tietoja");
 
         cottageInfoButtonsGridPane.add(createReservationButton, 0,0);
-        cottageInfoButtonsGridPane.add(changeReservationButton, 0,1);
+        cottageInfoButtonsGridPane.add(editReservationButton, 0,1);
         cottageInfoButtonsGridPane.add(removeReservationButton, 0,2);
-        cottageInfoButtonsGridPane.add(changeCottageInfoButton, 0,3);
+        cottageInfoButtonsGridPane.add(editCottageInfoButton, 0,3);
 
         cottageInfoButtonsGridPane.setHgap(15);
         cottageInfoButtonsGridPane.setVgap(15);
@@ -462,8 +462,94 @@ public class MainApplication extends Application {
         mainPane.getChildren().add(cottageInfo);
         cottageInfo.setVisible(false);
 
-        
+        /*
+        Varauksen hallinta
+         */
+        Pane reservationEdit = new Pane();
+        GridPane reservationEditGridPane = new GridPane();
 
+        Text cottageNameText = new Text("Mökin nimi");
+
+        Text reservationEditInfoText = new Text("Valitse asiakas listasta tai luo uusi asiakastieto:");
+
+        ObservableList<String> customersList = FXCollections.observableArrayList("Matti Meikäläinen", "Asdasdad");
+        ListView<String> customersListView = new ListView<>(customersList);
+
+        Button newCustomerButton = new Button("Uusi asiakas");
+
+        Label arrivalDayLabel = new Label("Saapumispäivä:");
+        Label departureDayLabel = new Label("Lähtöpäivä:");
+        DatePicker arrivalDayDatePicker = new DatePicker();
+        DatePicker departureDayDatePicker = new DatePicker();
+        Button reservationEditBackButton = new Button("Takaisin");
+        Label numberOfPeopleStayingLabel = new Label("Yöpyjien määrä:");
+        TextField numberOfPeopleStayingTextField = new TextField();
+        Button confirmReservationEditButton = new Button("Hyväksy");
+
+        reservationEditGridPane.add(cottageNameText, 0, 0);
+        reservationEditGridPane.add(reservationEditInfoText, 0, 1);
+        reservationEditGridPane.add(customersListView, 0, 2);
+        reservationEditGridPane.add(newCustomerButton, 0, 3);
+        reservationEditGridPane.add(arrivalDayLabel, 0, 4);
+        reservationEditGridPane.add(arrivalDayDatePicker, 1, 4);
+        reservationEditGridPane.add(departureDayLabel, 0, 5);
+        reservationEditGridPane.add(departureDayDatePicker, 1, 5);
+        reservationEditGridPane.add(numberOfPeopleStayingLabel, 0, 6);
+        reservationEditGridPane.add(numberOfPeopleStayingTextField, 1, 6);
+        reservationEditGridPane.add(confirmReservationEditButton, 1, 7);
+
+        reservationEditGridPane.setVgap(15);
+
+        reservationEdit.getChildren().addAll(reservationEditGridPane, reservationEditBackButton);
+        reservationEditGridPane.relocate(30,50);
+        reservationEditBackButton.relocate(10,10);
+
+        mainPane.getChildren().add(reservationEdit);
+        reservationEdit.setVisible(false);
+
+
+        /*
+        Mäkin lisääminen
+         */
+        Pane addCottage = new Pane();
+        GridPane addCottageGridPane = new GridPane();
+
+        Label cottageNameLabel = new Label("Mökin nimi:");
+        Label addressLabel = new Label("Osoite:");
+        Label descriptionLabel = new Label("Kuvaus:");
+        Label pricePerNightLabel = new Label("Hinta yöltä:");
+        Label capacityLabel = new Label("Kapasiteetti:");
+
+        TextField cottageNameTextField = new TextField();
+        TextArea addressTextArea = new TextArea();
+        TextArea descriptionTextArea = new TextArea();
+        TextField pricePerNightTextField = new TextField();
+        TextField capacityTextField = new TextField();
+
+        Button confirmAddCottageButton = new Button("Hyväksy");
+        Button addCottageBackButton = new Button("Takaisin");
+
+        addCottageGridPane.add(cottageNameLabel, 0, 0);
+        addCottageGridPane.add(cottageNameTextField, 1, 0);
+        addCottageGridPane.add(addressLabel, 0, 1);
+        addCottageGridPane.add(addressTextArea, 1, 1);
+        addCottageGridPane.add(descriptionLabel, 0, 2);
+        addCottageGridPane.add(descriptionTextArea, 1, 2);
+        addCottageGridPane.add(pricePerNightLabel, 0, 3);
+        addCottageGridPane.add(pricePerNightTextField, 1, 3);
+        addCottageGridPane.add(capacityLabel, 0, 4);
+        addCottageGridPane.add(capacityTextField, 1, 4);
+        addCottageGridPane.add(confirmAddCottageButton, 1, 5);
+
+        addCottageGridPane.setVgap(15);
+        addCottageGridPane.setHgap(15);
+
+        addCottage.getChildren().addAll(addCottageGridPane, addCottageBackButton);
+        addCottageGridPane.relocate(30,50);
+        addCottageBackButton.relocate(10,10);
+
+        mainPane.getChildren().add(addCottage);
+        addCottage.setVisible(false);
 
         //painikkeet
 
@@ -516,6 +602,32 @@ public class MainApplication extends Application {
             mainMenu.setVisible(false);
             cottageInfo.setVisible(true);
         });
+
+        createReservationButton.setOnAction(e->{
+            cottageInfo.setVisible(false);
+            reservationEdit.setVisible(true);
+        });
+
+        editReservationButton.setOnAction(e->{
+            cottageInfo.setVisible(false);
+            reservationEdit.setVisible(true);
+        });
+
+        reservationEditBackButton.setOnAction(e->{
+            reservationEdit.setVisible(false);
+            cottageInfo.setVisible(true);
+        });
+
+        editCottageInfoButton.setOnAction(e->{
+            cottageInfo.setVisible(false);
+            addCottage.setVisible(true);
+        });
+
+        addCottageBackButton.setOnAction(e->{
+            addCottage.setVisible(false);
+            cottageInfo.setVisible(true);
+        });
+
 
         /*
         scenen alustus

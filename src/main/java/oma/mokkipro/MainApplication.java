@@ -1,9 +1,13 @@
 package oma.mokkipro;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
@@ -38,7 +42,6 @@ public class MainApplication extends Application {
     public void start(Stage stage) {
 
         ConnectToSQL();
-
 
         Pane mainPane = new Pane();
 
@@ -82,7 +85,7 @@ public class MainApplication extends Application {
 
         //kirjautumis -pane pääpaneen
         mainPane.getChildren().add(logIn);
-        logIn.setVisible(true);
+        logIn.setVisible(false);
 
 
         /*
@@ -411,6 +414,59 @@ public class MainApplication extends Application {
         customerEdit.setVisible(false);
 
 
+        /*
+        Mökin tiedot
+         */
+        Pane cottageInfo = new Pane();
+        GridPane cottageInfoButtonsGridPane = new GridPane();
+        GridPane cottageInfoGridPane = new GridPane();
+
+        Button createReservationButton = new Button("Luo varaus");
+        Button changeReservationButton = new Button("Muuta varausta");
+        Button removeReservationButton = new Button("Poista varaus");
+        Button changeCottageInfoButton = new Button("Muuta mökin tietoja");
+
+        cottageInfoButtonsGridPane.add(createReservationButton, 0,0);
+        cottageInfoButtonsGridPane.add(changeReservationButton, 0,1);
+        cottageInfoButtonsGridPane.add(removeReservationButton, 0,2);
+        cottageInfoButtonsGridPane.add(changeCottageInfoButton, 0,3);
+
+        cottageInfoButtonsGridPane.setHgap(15);
+        cottageInfoButtonsGridPane.setVgap(15);
+
+        Image placeholderImage = new Image(getClass().getResource("300x200.png").toString());
+
+        ImageView cottageImageView = new ImageView(placeholderImage);
+
+        TextArea cottageInfoTextArea = new TextArea("Mökin nimi: \nOsoite: \nKuvaus: \nHinta per yö: \nKapasiteetti: ");
+        cottageInfoTextArea.setEditable(false);
+
+        ObservableList<String> reservationsList = FXCollections.observableArrayList("varaus1", "varaus2");
+        ListView<String> reservationsListView = new ListView<String>(reservationsList);
+
+        Button cottageInfoBackButton = new Button("Takaisin");
+
+
+        cottageInfoGridPane.add(cottageInfoTextArea, 0, 0);
+        cottageInfoGridPane.add(cottageImageView, 1, 0);
+        cottageInfoGridPane.add(reservationsListView, 0, 1);
+        cottageInfoGridPane.add(cottageInfoButtonsGridPane, 1, 1);
+
+        cottageInfoGridPane.setVgap(15);
+        cottageInfoGridPane.setHgap(15);
+
+        cottageInfo.getChildren().addAll(cottageInfoGridPane, cottageInfoBackButton);
+        cottageInfoBackButton.relocate(10,10);
+        cottageInfoGridPane.relocate(30, 50);
+
+        mainPane.getChildren().add(cottageInfo);
+        cottageInfo.setVisible(false);
+
+        
+
+
+        //painikkeet
+
         logInButton.setOnAction(e->{
             logIn.setVisible(false);
             mainMenu.setVisible(true);
@@ -449,6 +505,16 @@ public class MainApplication extends Application {
         customersBackButton.setOnAction(e->{
             customers.setVisible(false);
             mainMenu.setVisible(true);
+        });
+
+        cottageInfoBackButton.setOnAction(e->{
+            cottageInfo.setVisible(false);
+            mainMenu.setVisible(true);
+        });
+
+        cottagesButton.setOnAction(e->{
+            mainMenu.setVisible(false);
+            cottageInfo.setVisible(true);
         });
 
         /*

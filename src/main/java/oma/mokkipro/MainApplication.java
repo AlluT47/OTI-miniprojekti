@@ -29,75 +29,11 @@ public class MainApplication extends Application {
         launch(args);
     }
 
-    public void removeAllFromAsiakas(){
-        try {
-            Connection conn = Tietokantayhteys.getConnection();
-            System.out.println("Yhteys tietokantaan muodostettu!"); //Tietokantayhteyden testaamiseksi, voi poistaa myöhemmin
-            // Prepare the SQL query to select all records from the book table
-
-
-            String selectQuery = "DELETE FROM asiakas";
-            PreparedStatement statement = conn.prepareStatement(selectQuery);
-
-            // Execute the query and retrieve the result set
-            statement.executeUpdate();
-            System.out.println("deleted all from asiakas");
-
-            conn.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    public void insertToAsiakas(int n){
-        try {
-            Connection conn = Tietokantayhteys.getConnection();
-            System.out.println("Yhteys tietokantaan muodostettu!"); //Tietokantayhteyden testaamiseksi, voi poistaa myöhemmin
-            // Prepare the SQL query to select all records from the book table
-
-            Random rnd = new Random();
-            String name = "Matti ";
-            String email = "matti@sposti.fi";
-            for (int i = 0; i < n; i++) {
-                int a = rnd.nextInt();
-                String selectQuery = "INSERT INTO asiakas VALUES (" + a + ", '"+ name+a + "', '" + a+email + "', '" + i+i+a + "', 'asiakas')" ;
-                PreparedStatement statement = conn.prepareStatement(selectQuery);
-
-                // Execute the query and retrieve the result set
-                statement.executeUpdate();
-                System.out.println("inserted " + i);
-            }
-
-            conn.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
 
     public void ConnectToSQL(){
         try {
             Connection conn = Tietokantayhteys.getConnection();
             System.out.println("Yhteys tietokantaan muodostettu!"); //Tietokantayhteyden testaamiseksi, voi poistaa myöhemmin
-            // Prepare the SQL query to select all records from the book table
-            String selectQuery = "SELECT * FROM asiakas";
-            PreparedStatement statement = conn.prepareStatement(selectQuery);
-
-            // Execute the query and retrieve the result set
-            ResultSet resultSet = statement.executeQuery();
-            System.out.println("The Available Data\n");
-
-            // Iterate over the result set and print the retrieved data
-            while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String name = resultSet.getString("nimi");
-                String sposti = resultSet.getString("sposti");
-                String puhelin = resultSet.getString("puhelin");
-
-                System.out.println("ID: " + id + ", nimi: " + name + ", email: "
-                        + sposti + ", puhelinnumero "+puhelin);
-            }
             conn.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -108,8 +44,6 @@ public class MainApplication extends Application {
     @Override
     public void start(Stage stage) {
 
-        removeAllFromAsiakas();
-        insertToAsiakas(5);
         ConnectToSQL();
 
         Pane mainPane = new Pane();

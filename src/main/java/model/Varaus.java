@@ -46,12 +46,6 @@ public class Varaus {
     }
 
     // Setterit
-    public void setAsiakasId(int asiakasId){
-        this.asiakasId = asiakasId;
-    }
-    public void setMokkiId(int mokkiId){
-        this.mokkiId = mokkiId;
-    }
     public void setVarauksenAlku(LocalDate varauksenAlku){
         this.varauksenAlku = varauksenAlku;
     }

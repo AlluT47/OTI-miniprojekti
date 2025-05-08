@@ -121,7 +121,7 @@ public class AsiakasDAO {
 
     // Hakee asiakkaan id:llä
     public Asiakas haeAsiakasIdlla(int asiakasId) {
-        String sql = "SELECT * FROM asiakas WHERE id LIKE ?";
+        String sql = "SELECT * FROM asiakas WHERE id = ?";
 
         try (Connection conn = Tietokantayhteys.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)) {

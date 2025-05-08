@@ -94,6 +94,37 @@ public class VarausDAO {
             e.printStackTrace();
         }
     } 
+
+    // Hakee varaukset valitulle mökille
+    public List<Varaus> haeVarauksetMokille(int mokkiId) {
+        List<Varaus> varaukset = new ArrayList<>();
+        String sql = "SELECT * FROM varaa WHERE mökki_id = ? ORDER BY aloitus_päivä)";
+
+        try (Connection conn = Tietokantayhteys.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, mokkiId);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Varaus varaus = new Varaus(
+                    rs.getInt("id"), 
+                    rs.getInt("asiakas_id"), 
+                    rs.getInt("mökki_id"), 
+                    rs.getDate("aloitus_päivä").toLocalDate(), 
+                    rs.getDate("lopetus_päivä").toLocalDate(), 
+                    rs.getString("tila"), 
+                    rs.getTimestamp("varaus_aika").toLocalDateTime());
+
+                    varaukset.add(varaus);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return varaukset;
+    }
 }
 
 

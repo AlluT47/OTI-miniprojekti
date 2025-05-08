@@ -96,5 +96,32 @@ public class MokkiDAO {
             e.printStackTrace();
         }
     }
+
+    // Hakee mökin id:llä
+    public Mokki haeMokkiIdlla(int mokkiId) {
+        String sql = "SELECT * FROM mokki WHERE id = ?";
+
+        try (Connection conn = Tietokantayhteys.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                pstmt.setInt(1, mokkiId);
+                ResultSet rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    return new Mokki(
+                        rs.getInt("id"),
+                        rs.getString("nimi"),
+                        rs.getString("osoite"),
+                        rs.getString("kuvaus"),
+                        rs.getDouble("hinta_per_yö"),
+                        rs.getInt("kapasiteetti"),
+                        rs.getBoolean("on_vapaana"));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+    }
     
 }

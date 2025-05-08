@@ -90,7 +90,7 @@ public class AsiakasDAO {
         }
     }
 
-    // Hakee asiakasta nimellä
+    // Hakee asiakkaita nimellä
     public List<Asiakas> haeAsiakkaatNimella(String nimi) {
         List<Asiakas> asiakkaat = new ArrayList<>();
         String sql = "SELECT * FROM asiakas WHERE nimi LIKE ?";
@@ -117,5 +117,30 @@ public class AsiakasDAO {
             }
 
             return asiakkaat;
+    }
+
+    // Hakee asiakkaan id:llä
+    public Asiakas haeAsiakasIdlla(int asiakasId) {
+        String sql = "SELECT * FROM asiakas WHERE id LIKE ?";
+
+        try (Connection conn = Tietokantayhteys.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                pstmt.setInt(1, asiakasId);
+                ResultSet rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    return new Asiakas(
+                        rs.getInt("id"),
+                        rs.getString("nimi"),
+                        rs.getString("sposti"),
+                        rs.getString("puhelin"),
+                        rs.getString("asiakastyyppi"));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return null;
     }
 }

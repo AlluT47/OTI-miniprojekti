@@ -89,4 +89,33 @@ public class AsiakasDAO {
             e.printStackTrace();
         }
     }
+
+    // Hakee asiakasta nimellä
+    public List<Asiakas> haeAsiakkaatNimella(String nimi) {
+        List<Asiakas> asiakkaat = new ArrayList<>();
+        String sql = "SELECT * FROM asiakas WHERE nimi LIKE ?";
+
+        try (Connection conn = Tietokantayhteys.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                pstmt.setString(1, "%" + nimi + "%");
+                ResultSet rs = pstmt.executeQuery();
+
+                while (rs.next()) {
+                    Asiakas asiakas = new Asiakas(
+                        rs.getInt("id"), 
+                        rs.getString("nimi"), 
+                        rs.getString("sposti"), 
+                        rs.getString("puhelin"), 
+                        rs.getString("asiakastyyppi"));
+                    
+                    asiakkaat.add(asiakas);
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return asiakkaat;
+    }
 }

@@ -512,7 +512,7 @@ public class MainApplication extends Application {
 
 
         /*
-        Mäkin lisääminen
+        Mökin lisääminen
          */
         Pane addCottage = new Pane();
         GridPane addCottageGridPane = new GridPane();
@@ -553,6 +553,105 @@ public class MainApplication extends Application {
 
         mainPane.getChildren().add(addCottage);
         addCottage.setVisible(false);
+
+
+        /*
+        Laskujen tarkastelu
+         */
+        Pane invoices = new Pane();
+        BorderPane invoicesBorderPane = new BorderPane();
+
+        Button invoiceInfoButton = new Button("Laskun tiedot");
+
+        ObservableList<String> invoicesList = FXCollections.observableArrayList("252345, 11.5.2024", "35345, 1.1.2025");
+        ListView<String> invoicesListView = new ListView<>(invoicesList);
+        Button invoiceBackButton = new Button("Takaisin");
+
+        invoicesBorderPane.setLeft(invoicesListView);
+        invoicesBorderPane.setRight(invoiceInfoButton);
+        BorderPane.setMargin(invoicesListView, new Insets(10));
+        BorderPane.setMargin(invoiceInfoButton, new Insets(10));
+
+        invoices.getChildren().addAll(invoicesBorderPane, invoiceBackButton);
+        invoicesBorderPane.relocate(30,50);
+        invoiceBackButton.relocate(10,10);
+
+        mainPane.getChildren().add(invoices);
+        invoices.setVisible(false);
+
+
+        /*
+        Laskun tiedot
+         */
+        Pane invoiceInfo = new Pane();
+        GridPane invoiceInfoGridPane = new GridPane();
+
+        invoiceInfoGridPane.setVgap(15);
+        invoiceInfoGridPane.setHgap(15);
+
+        Button invoiceInfoBackButton = new Button("Takaisin");
+
+        Label invoiceIDLabel = new Label("Laskun ID:");
+        Label invoiceCottageNameLabel = new Label("Mökin nimi:");
+        Label invoiceCustomerNameLabel = new Label("Asiakkaan nimi");
+        Label invoiceCustomerPhoneLabel = new Label("Asiakkaan puhelinnumero:");
+        Label invoiceArrivalDayLabel = new Label("Tulopäivä:");
+        Label invoiceDepartureDayLabel = new Label("Lähtöpäivä:");
+        Label invoiceDayAmountLabel = new Label("Päivien määrä:");
+        Label invoiceCostPerNightLabel = new Label("Hinta/yö:");
+        Label invoiceCostLabel = new Label("Kokonaishinta:");
+        Label invoiceDueDayLabel = new Label("Laskun eräpäivä:");
+
+        TextField invoiceIDTextField = new TextField();
+        TextField invoiceCottageNameTextField = new TextField();
+        TextField invoiceCustomerNameTextField = new TextField();
+        TextField invoiceCustomerPhoneTextField = new TextField();
+        TextField invoiceArrivalDayTextField = new TextField();
+        TextField invoiceDepartureDayTextField = new TextField();
+        TextField invoiceDayAmountTextField = new TextField();
+        TextField invoiceCostPerNightTextField = new TextField();
+        TextField invoiceCostTextField = new TextField();
+        TextField invoiceDueDayTextField = new TextField();
+
+        invoiceIDTextField.setEditable(false);
+        invoiceCottageNameTextField.setEditable(false);
+        invoiceCustomerNameTextField.setEditable(false);
+        invoiceCustomerPhoneTextField.setEditable(false);
+        invoiceArrivalDayTextField.setEditable(false);
+        invoiceDepartureDayTextField.setEditable(false);
+        invoiceDayAmountTextField.setEditable(false);
+        invoiceCostPerNightTextField.setEditable(false);
+        invoiceCostTextField.setEditable(false);
+        invoiceDueDayTextField.setEditable(false);
+
+        invoiceInfoGridPane.add(invoiceIDLabel, 0, 0);
+        invoiceInfoGridPane.add(invoiceIDTextField, 1, 0);
+        invoiceInfoGridPane.add(invoiceCottageNameLabel, 0, 1);
+        invoiceInfoGridPane.add(invoiceCottageNameTextField, 1, 1);
+        invoiceInfoGridPane.add(invoiceCustomerNameLabel, 0, 2);
+        invoiceInfoGridPane.add(invoiceCustomerNameTextField, 1, 2);
+        invoiceInfoGridPane.add(invoiceCustomerPhoneLabel, 0, 3);
+        invoiceInfoGridPane.add(invoiceCustomerPhoneTextField, 1, 3);
+        invoiceInfoGridPane.add(invoiceArrivalDayLabel, 0, 4);
+        invoiceInfoGridPane.add(invoiceArrivalDayTextField, 1, 4);
+        invoiceInfoGridPane.add(invoiceDepartureDayLabel, 0, 5);
+        invoiceInfoGridPane.add(invoiceDepartureDayTextField, 1, 5);
+        invoiceInfoGridPane.add(invoiceDayAmountLabel, 0, 6);
+        invoiceInfoGridPane.add(invoiceDayAmountTextField, 1, 6);
+        invoiceInfoGridPane.add(invoiceCostPerNightLabel, 2, 6);
+        invoiceInfoGridPane.add(invoiceCostPerNightTextField, 3, 6);
+        invoiceInfoGridPane.add(invoiceCostLabel, 0, 7);
+        invoiceInfoGridPane.add(invoiceCostTextField, 1, 7);
+        invoiceInfoGridPane.add(invoiceDueDayLabel, 0, 8);
+        invoiceInfoGridPane.add(invoiceDueDayTextField, 1, 8);
+
+        invoiceInfo.getChildren().addAll(invoiceInfoBackButton, invoiceInfoGridPane);
+        invoiceInfoGridPane.relocate(30,50);
+        invoiceInfoBackButton.relocate(10,10);
+        mainPane.getChildren().add(invoiceInfo);
+        invoiceInfo.setVisible(false);
+
+
 
         //painikkeet
 
@@ -629,6 +728,26 @@ public class MainApplication extends Application {
         addCottageBackButton.setOnAction(e->{
             addCottage.setVisible(false);
             cottageInfo.setVisible(true);
+        });
+
+        invoiceBackButton.setOnAction(e->{
+            invoices.setVisible(false);
+            mainMenu.setVisible(true);
+        });
+
+        invoiceInfoButton.setOnAction(e->{
+            invoices.setVisible(false);
+            invoiceInfo.setVisible(true);
+        });
+
+        invoiceInfoBackButton.setOnAction(e->{
+            invoiceInfo.setVisible(false);
+            invoices.setVisible(true);
+        });
+
+        invoicesButton.setOnAction(e->{
+            mainMenu.setVisible(false);
+            invoices.setVisible(true);
         });
 
 

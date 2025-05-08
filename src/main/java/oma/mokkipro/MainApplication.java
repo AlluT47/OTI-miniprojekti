@@ -1,4 +1,6 @@
 package oma.mokkipro;
+import dao.AsiakasDAO;
+import dao.LaskuDAO;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,11 +18,17 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import model.Asiakas;
+import model.Lasku;
+import dao.LaskuDAO;
 import util.Tietokantayhteys;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 
 public class MainApplication extends Application {
@@ -28,11 +36,49 @@ public class MainApplication extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    
+
+    //listat varauksista ja asiakkaista käyttöliittymää varten
+    private ObservableList<String> invoicesList = FXCollections.observableArrayList();
+    private ObservableList<String> customersList = FXCollections.observableArrayList();
+
+    //hakee varausten idt ja eräpäivät listaan
+    private void fetchInvoiceIDs(){
+        LaskuDAO laskuDao = new LaskuDAO();
+        List<Lasku> laskuList = laskuDao.haeKaikkiLaskut();
+        for(Lasku l:laskuList){
+            invoicesList.add(l.getLaskuId() + ", " + l.getErapaiva());
+        }
+    }
+
+    //hakee asiakkaiden nimet listaan
+    private void fetchCustomerNames(){
+        AsiakasDAO asiakasDao = new AsiakasDAO();
+        List<Asiakas> asiakasList = asiakasDao.haeKaikkiAsiakkaat();
+        for(Asiakas a:asiakasList){
+            customersList.add(a.getNimi());
+        }
+    }
+
+
+    //laskujen listan hakemisen debuggausta varten
+//    private void createInvoices(){
+//        Random rnd = new Random();
+//        LaskuDAO ld = new LaskuDAO();
+//        for (int i = 0; i < 5; i++) {
+//            Lasku l = new Lasku(i, rnd.nextInt(), i*100, LocalDate.now(), LocalDateTime.now());
+//            ld.lisaaLasku(l);
+//        }
+//    }
+
 
     @Override
     public void start(Stage stage) {
 
+        //hakee ensin tietokannasta varaukset ja asiakkaat
+        fetchInvoiceIDs();
+        fetchCustomerNames();
+
+        //pääpane
         Pane mainPane = new Pane();
 
         /*
@@ -462,7 +508,6 @@ public class MainApplication extends Application {
 
         Text reservationEditInfoText = new Text("Valitse asiakas listasta tai luo uusi asiakastieto:");
 
-        ObservableList<String> customersList = FXCollections.observableArrayList("Matti Meikäläinen", "Asdasdad");
         ListView<String> customersListView = new ListView<>(customersList);
 
         Button newCustomerButton = new Button("Uusi asiakas");
@@ -550,7 +595,6 @@ public class MainApplication extends Application {
 
         Button invoiceInfoButton = new Button("Laskun tiedot");
 
-        ObservableList<String> invoicesList = FXCollections.observableArrayList("252345, 11.5.2024", "35345, 1.1.2025");
         ListView<String> invoicesListView = new ListView<>(invoicesList);
         Button invoiceBackButton = new Button("Takaisin");
 

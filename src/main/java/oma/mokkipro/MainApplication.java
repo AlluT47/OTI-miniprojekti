@@ -28,23 +28,10 @@ public class MainApplication extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
-
-    public void ConnectToSQL(){
-        try {
-            Connection conn = Tietokantayhteys.getConnection();
-            System.out.println("Yhteys tietokantaan muodostettu!"); //Tietokantayhteyden testaamiseksi, voi poistaa myöhemmin
-            conn.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
+    
 
     @Override
     public void start(Stage stage) {
-
-        ConnectToSQL();
 
         Pane mainPane = new Pane();
 

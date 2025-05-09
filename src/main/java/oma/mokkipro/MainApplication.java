@@ -1,6 +1,7 @@
 package oma.mokkipro;
 import dao.AsiakasDAO;
 import dao.LaskuDAO;
+import dao.MokkiDAO;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -21,6 +22,7 @@ import javafx.stage.Stage;
 import model.Asiakas;
 import model.Lasku;
 import dao.LaskuDAO;
+import model.Mokki;
 import util.Tietokantayhteys;
 
 import java.sql.Connection;
@@ -40,6 +42,7 @@ public class MainApplication extends Application {
     //listat varauksista ja asiakkaista käyttöliittymää varten
     private ObservableList<String> invoicesList = FXCollections.observableArrayList();
     private ObservableList<String> customersList = FXCollections.observableArrayList();
+    private ObservableList<String> cottageList = FXCollections.observableArrayList();
 
     //hakee varausten idt ja eräpäivät listaan
     private void fetchInvoiceIDs(){
@@ -56,6 +59,14 @@ public class MainApplication extends Application {
         List<Asiakas> asiakasList = asiakasDao.haeKaikkiAsiakkaat();
         for(Asiakas a:asiakasList){
             customersList.add(a.getNimi());
+        }
+    }
+
+    private void fetchCottageNames(){
+        MokkiDAO mokkiDao = new MokkiDAO();
+        List<Mokki> mokkiList = mokkiDao.haeKaikkiMokit();
+        for(Mokki m:mokkiList){
+            cottageList.add(m.getNimi());
         }
     }
 
@@ -77,6 +88,7 @@ public class MainApplication extends Application {
         //hakee ensin tietokannasta varaukset ja asiakkaat
         fetchInvoiceIDs();
         fetchCustomerNames();
+        fetchCottageNames();
 
         //pääpane
         Pane mainPane = new Pane();
@@ -121,7 +133,7 @@ public class MainApplication extends Application {
 
         //kirjautumis -pane pääpaneen
         mainPane.getChildren().add(logIn);
-        logIn.setVisible(true);
+        logIn.setVisible(false);
 
 
         /*
@@ -681,6 +693,46 @@ public class MainApplication extends Application {
         invoiceInfoBackButton.relocate(10,10);
         mainPane.getChildren().add(invoiceInfo);
         invoiceInfo.setVisible(false);
+
+
+        /*
+        Raportit
+         */
+        Pane reports = new Pane();
+        GridPane reportOptionGridPane = new GridPane();
+
+        reportOptionGridPane.setVgap(15);
+        reportOptionGridPane.setHgap(15);
+
+        DatePicker reportStartDatePicker = new DatePicker();
+        DatePicker reportEndDatePicker = new DatePicker();
+
+        Label reportStartLabel = new Label("Valitse ajanjakson alkupäivä:");
+        Label reportEndLabel = new Label("Valitse ajanjakson loppupäivä:");
+
+        ToggleGroup reportOptionToggleGroup = new ToggleGroup();
+
+        RadioButton reportAllRadioButton = new RadioButton();
+        reportAllRadioButton.setToggleGroup(reportOptionToggleGroup);
+        reportAllRadioButton.setText("Kaikki");
+        RadioButton reportCottageRadioButton = new RadioButton();
+        reportCottageRadioButton.setToggleGroup(reportOptionToggleGroup);
+        reportCottageRadioButton.setText("Tietty mökki");
+
+        ComboBox<String> cottagesComboBox = new ComboBox<>(cottageList);
+
+        reportOptionGridPane.add(reportStartLabel, 0, 0);
+        reportOptionGridPane.add(reportStartDatePicker, 1, 0);
+        reportOptionGridPane.add(reportEndLabel, 0, 1);
+        reportOptionGridPane.add(reportEndDatePicker, 1, 1);
+        reportOptionGridPane.add(reportAllRadioButton, 0, 2);
+        reportOptionGridPane.add(reportCottageRadioButton, 1, 2);
+        reportOptionGridPane.add(cottagesComboBox, 1, 3);
+
+        reports.getChildren().add(reportOptionGridPane);
+        reportOptionGridPane.relocate(30,50);
+
+        mainPane.getChildren().add(reports);
 
 
 

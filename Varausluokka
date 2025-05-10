@@ -1,0 +1,50 @@
+package com.example.varausohjelma;
+
+import java.time.LocalDate;
+
+public class Varaus {
+    private String nimi;
+    private LocalDate meno;
+    private LocalDate tulo;
+    private Mokki mokki;
+
+    public Varaus(String nimi, LocalDate meno, LocalDate tulo, Mokki mokki) {
+        this.nimi = nimi;
+        this.meno = meno;
+        this.tulo = tulo;
+        this.mokki = mokki;
+    }
+
+    public String getNimi() {
+        return nimi;
+    }
+    public void setNimi(String nimi) {
+        this.nimi = nimi;
+    }
+
+    public LocalDate getMeno() {
+        return meno;
+    }
+    public void setMeno(LocalDate meno) {
+        this.meno = meno;
+    }
+
+    public LocalDate getTulo() {
+        return tulo;
+    }
+    public void setTulo(LocalDate tulo) {
+        this.tulo = tulo;
+    }
+
+    public Mokki getMokki() {
+        return mokki;
+    }
+    public void setMokki(Mokki mokki) {
+        this.mokki = mokki;
+    }
+
+    @Override
+    public String toString() {
+        return nimi + ": " + meno + " - " + tulo;
+    }
+}

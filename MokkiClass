@@ -1,0 +1,59 @@
+package com.example.varausohjelma;
+
+public class Mokki {
+    private String osoite;
+    private double vhMin;
+    private double vhMax;
+    private double vlhMin;
+    private double vlhMax;
+
+    public Mokki(String osoite, double vhMin, double vhMax,
+                 double vlhMin, double vlhMax) {
+        this.osoite = osoite;
+        this.vhMin = vhMin;
+        this.vhMax = vhMax;
+        this.vlhMin = vlhMin;
+        this.vlhMax = vlhMax;
+    }
+
+    public String getOsoite() {
+        return osoite;
+    }
+    public void setOsoite(String osoite) {
+        this.osoite = osoite;
+    }
+
+    public double getVhMin() {
+        return vhMin;
+    }
+    public void setVhMin(double vhMin) {
+        this.vhMin = vhMin;
+    }
+
+    public double getVhMax() {
+        return vhMax;
+    }
+    public void setVhMax(double vhMax) {
+        this.vhMax = vhMax;
+    }
+
+    public double getVlhMin() {
+        return vlhMin;
+    }
+    public void setVlhMin(double vlhMin) {
+        this.vlhMin = vlhMin;
+    }
+
+    public double getVlhMax() {
+        return vlhMax;
+    }
+    public void setVlhMax() {
+        this.vlhMax = vlhMax;
+    }
+
+    @Override
+    public String toString() {
+        return "Osoite: " + osoite + "\n" + "Viikkohinta: " + vhMin + " - " + vhMax + "€\n" +
+                "Viikonloppuhinta: " + vlhMin + " - " + vlhMax + "€";
+    }
+}

@@ -37,6 +37,14 @@ public class MainApplication extends Application {
     private ObservableList<String> customersList = FXCollections.observableArrayList();
     private ObservableList<String> cottageList = FXCollections.observableArrayList();
 
+    private GridPane customer1GridPane, customer2GridPane, customer3GridPane, customer4GridPane, customer5GridPane,
+            customer6GridPane, customer7GridPane, customer8GridPane, customer9GridPane;
+
+    private Text customer1NameText, customer2NameText, customer3NameText, customer4NameText, customer5NameText,
+            customer6NameText, customer7NameText, customer8NameText, customer9NameText;
+
+    private int currentCustomerPage = 0;
+
     //hakee varausten idt ja eräpäivät listaan
     private void fetchInvoiceIDs(){
         LaskuDAO laskuDao = new LaskuDAO();
@@ -82,6 +90,64 @@ public class MainApplication extends Application {
 //            md.lisaaMokki(m);
 //        }
 //    }
+
+//    private void createCustomers(){
+//        Random rnd = new Random();
+//        AsiakasDAO ad = new AsiakasDAO();
+//        for (int i = 0; i < 5; i++) {
+//            int rndint = rnd.nextInt();
+//            Asiakas a = new Asiakas(i, "Asiakas " + rndint, "sposti" + rndint + "@sposti.fi", "" + rndint, "yksityisasiakas");
+//            ad.lisaaAsiakas(a);
+//        }
+//    }
+
+    private void setCustomersPage(int page){
+        currentCustomerPage = page;
+        //ensin kaikki asikaspanet piiloon
+        customer1GridPane.setVisible(false);
+        customer2GridPane.setVisible(false);
+        customer3GridPane.setVisible(false);
+        customer4GridPane.setVisible(false);
+        customer5GridPane.setVisible(false);
+        customer6GridPane.setVisible(false);
+        customer7GridPane.setVisible(false);
+        customer8GridPane.setVisible(false);
+        customer9GridPane.setVisible(false);
+
+        //käydään läpi sivun asiakkaat, indeksistä sivunnumero * 9 + 1 indeksiin (sivunnumero + 1) * 9 + 1 asti
+        for (int i = page*9 + 1; i <(page+1)*9 +1 ; i++) {
+            //jos indeksin jakojäännös on 1, ja listassa on tarpeeksi asiakkaita, laitetaan sivun ensimmäinen
+            //asiakas täksi asiakkaaksi, ja näytetään asiakaspane
+            if(i%9 == 1 && customersList.size() >= i){
+                customer1NameText.setText(customersList.get(i-1));
+                customer1GridPane.setVisible(true);
+            }if(i%9 == 2 && customersList.size() >= i){
+                customer2NameText.setText(customersList.get(i-1));
+                customer2GridPane.setVisible(true);
+            }if(i%9 == 3 && customersList.size() >= i){
+                customer3NameText.setText(customersList.get(i-1));
+                customer3GridPane.setVisible(true);
+            }if(i%9 == 4 && customersList.size() >= i){
+                customer4NameText.setText(customersList.get(i-1));
+                customer4GridPane.setVisible(true);
+            }if(i%9 == 5 && customersList.size() >= i){
+                customer5NameText.setText(customersList.get(i-1));
+                customer5GridPane.setVisible(true);
+            }if(i%9 == 6 && customersList.size() >= i){
+                customer6NameText.setText(customersList.get(i-1));
+                customer6GridPane.setVisible(true);
+            }if(i%9 == 7 && customersList.size() >= i){
+                customer7NameText.setText(customersList.get(i-1));
+                customer7GridPane.setVisible(true);
+            }if(i%9 == 8 && customersList.size() >= i){
+                customer8NameText.setText(customersList.get(i-1));
+                customer8GridPane.setVisible(true);
+            }if(i%9 == 0 && customersList.size() >= i){
+                customer9NameText.setText(customersList.get(i-1));
+                customer9GridPane.setVisible(true);
+            }
+        }
+    }
 
 
     @Override
@@ -190,19 +256,19 @@ public class MainApplication extends Application {
         Pane customer7Pane = new Pane();
         Pane customer8Pane = new Pane();
         Pane customer9Pane = new Pane();
-        GridPane customer1GridPane = new GridPane();
-        GridPane customer2GridPane = new GridPane();
-        GridPane customer3GridPane = new GridPane();
-        GridPane customer4GridPane = new GridPane();
-        GridPane customer5GridPane = new GridPane();
-        GridPane customer6GridPane = new GridPane();
-        GridPane customer7GridPane = new GridPane();
-        GridPane customer8GridPane = new GridPane();
-        GridPane customer9GridPane = new GridPane();
+        customer1GridPane = new GridPane();
+        customer2GridPane = new GridPane();
+        customer3GridPane = new GridPane();
+        customer4GridPane = new GridPane();
+        customer5GridPane = new GridPane();
+        customer6GridPane = new GridPane();
+        customer7GridPane = new GridPane();
+        customer8GridPane = new GridPane();
+        customer9GridPane = new GridPane();
 
         //asiakas 1
 
-        Text customer1NameText = new Text("Matti Meikäläinen 1");
+        customer1NameText = new Text("Matti Meikäläinen 1");
         Button customer1Button = new Button("Katso tietoja");
 
         Rectangle customer1BGRectangle = new Rectangle(140, 80);
@@ -219,7 +285,7 @@ public class MainApplication extends Application {
 
         //asiakas 2
 
-        Text customer2NameText = new Text("Matti Meikäläinen 2");
+        customer2NameText = new Text("Matti Meikäläinen 2");
         Button customer2Button = new Button("Katso tietoja");
 
         Rectangle customer2BGRectangle = new Rectangle(140, 80);
@@ -236,7 +302,7 @@ public class MainApplication extends Application {
 
         //asiakas 3
 
-        Text customer3NameText = new Text("Matti Meikäläinen 3");
+        customer3NameText = new Text("Matti Meikäläinen 3");
         Button customer3Button = new Button("Katso tietoja");
 
         Rectangle customer3BGRectangle = new Rectangle(140, 80);
@@ -253,7 +319,7 @@ public class MainApplication extends Application {
 
         //asiakas 4
 
-        Text customer4NameText = new Text("Matti Meikäläinen 4");
+        customer4NameText = new Text("Matti Meikäläinen 4");
         Button customer4Button = new Button("Katso tietoja");
 
         Rectangle customer4BGRectangle = new Rectangle(140, 80);
@@ -270,7 +336,7 @@ public class MainApplication extends Application {
 
         //asiakas 5
 
-        Text customer5NameText = new Text("Matti Meikäläinen 5");
+        customer5NameText = new Text("Matti Meikäläinen 5");
         Button customer5Button = new Button("Katso tietoja");
 
         Rectangle customer5BGRectangle = new Rectangle(140, 80);
@@ -287,7 +353,7 @@ public class MainApplication extends Application {
 
         //asiakas 6
 
-        Text customer6NameText = new Text("Matti Meikäläinen 6");
+        customer6NameText = new Text("Matti Meikäläinen 6");
         Button customer6Button = new Button("Katso tietoja");
 
         Rectangle customer6BGRectangle = new Rectangle(140, 80);
@@ -304,7 +370,7 @@ public class MainApplication extends Application {
 
         //asiakas 7
 
-        Text customer7NameText = new Text("Matti Meikäläinen 7");
+        customer7NameText = new Text("Matti Meikäläinen 7");
         Button customer7Button = new Button("Katso tietoja");
 
         Rectangle customer7BGRectangle = new Rectangle(140, 80);
@@ -321,7 +387,7 @@ public class MainApplication extends Application {
 
         //asiakas 8
 
-        Text customer8NameText = new Text("Matti Meikäläinen 8");
+        customer8NameText = new Text("Matti Meikäläinen 8");
         Button customer8Button = new Button("Katso tietoja");
 
         Rectangle customer8BGRectangle = new Rectangle(140, 80);
@@ -338,7 +404,7 @@ public class MainApplication extends Application {
 
         //asiakas 9
 
-        Text customer9NameText = new Text("Matti Meikäläinen 9");
+        customer9NameText = new Text("Matti Meikäläinen 9");
         Button customer9Button = new Button("Katso tietoja");
 
         Rectangle customer9BGRectangle = new Rectangle(140, 80);
@@ -354,7 +420,6 @@ public class MainApplication extends Application {
         customersGridPane.add(customer9Pane, 2, 2);
 
 
-
         customersGridPane.setVgap(15);
         customersGridPane.setHgap(15);
 
@@ -364,6 +429,18 @@ public class MainApplication extends Application {
 
         Button previousPageButton = new Button("Edellinen sivu");
         Button nextPageButton = new Button("Seuraava sivu");
+
+        previousPageButton.setOnAction(e->{
+            if(currentCustomerPage>= 1){
+                setCustomersPage(currentCustomerPage-1);
+            }
+        });
+
+        nextPageButton.setOnAction(e->{
+            if(currentCustomerPage + 1 <= customersList.size()/9){
+                setCustomersPage(currentCustomerPage + 1);
+            }
+        });
 
         Button customersBackButton = new Button("Takaisin");
 
@@ -940,6 +1017,8 @@ public class MainApplication extends Application {
             reports.setVisible(true);
         });
 
+
+        setCustomersPage(0);
 
         /*
         scenen alustus

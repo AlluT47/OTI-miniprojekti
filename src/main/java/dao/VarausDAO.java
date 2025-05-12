@@ -126,6 +126,105 @@ public class VarausDAO {
         
         return varaukset;
     }
+
+    // Hakee yhteenvedon raportointiin kaikkien mökkien osalta
+    public Raportointi haeYhteenvetoKaikista(LocalDate alkupvm, LocalDate loppupvm) {
+        int varaustenMaara = 0;
+        int uudetAsiakkaat = 0;
+        int palaavatAsiakkaat = 0;
+        double kokonaistulot = 0;
+        double keskimaarainenPituus = 0;
+        double kayttoaste = 0;
+
+        String varauksetSql = "SELECT COUNT(*) FROM varaa WHERE aloitus_päivä >= ? AND lopetus_päivä <= ?";
+        String pituusSql = """
+                SELECT AVG(DATEDIFF(lopetus_päivä, aloitus_päivä))
+                FROM varaa WHERE aloitus_päivä >= ? AND lopetus_päivä <= ?";
+                """;
+        String tulotSql = """
+                SELECT SUM(m.hinta_per_yö * DATEDIFF(v.lopetus_päivä, v.aloitus_päivä))
+                FROM varaa v JOIN mokki m ON v.mokki_id = m.id
+                WHERE v.aloitus_päivä >= ? AND v.lopetus_päivä <= ?
+                """;
+        String asiakasSql = """
+                SELECT asiakas_id, COUNT(*) as kpl
+                FROM varaa WHERE aloitus_päivä >= ? AND lopetus_päivä <= ? GROUP BY asiakas_id
+                """;
+
+        try (Connection conn = Tietokantayhteys.getConnection()) {
+
+            // Varausten lukumäärä
+            try (PreparedStatement pstmt = conn.prepareStatement(varauksetSql)) {
+                pstmt.setDate(1, Date.valueOf(alkupvm));
+                pstmt.setDate(2, Date.valueOf(loppupvm));
+                ResultSet rs = pstmt.executeQuery();
+                if (rs.next()) {
+                    varaustenMaara = rs.getInt(1);
+                }
+            }
+
+            // Varausten keskimääräinen pituus
+            try (PreparedStatement pstmt = conn.prepareStatement(pituusSql)) {
+                pstmt.setDate(1, Date.valueOf(alkupvm));
+                pstmt.setDate(2, Date.valueOf(loppupvm));
+                ResultSet rs = pstmt.executeQuery();
+                if (rs.next()) {
+                    keskimaarainenPituus = rs.getDouble(1);
+                }
+            }
+
+            // Kokonaistulot
+            try (PreparedStatement pstmt = conn.prepareStatement(tulotSql)) {
+                pstmt.setDate(1, Date.valueOf(alkupvm));
+                pstmt.setDate(2, Date.valueOf(loppupvm));
+                ResultSet rs = pstmt.executeQuery();
+                if (rs.next()) {
+                    kokonaistulot = rs.getDouble(1);
+                }
+            }
+
+            // Uudet ja palaavat asiakkaat
+            try (PreparedStatement pstmt = conn.prepareStatement(asiakasSql)) {
+                pstmt.setDate(1, Date.valueOf(alkupvm));
+                pstmt.setDate(2, Date.valueOf(loppupvm));
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    int kpl = rs.getInt("kpl");
+                    if (kpl == 1) {
+                        uudetAsiakkaat++;
+                    } else
+                        palaavatAsiakkaat++;
+                }
+            }
+
+            // Mökkien käyttöaste
+            int paiviaYhteensa = (int) ChronoUnit.DAYS.between(alkupvm, alkupvm);
+            int mokkienMaara = new MokkiDAO().haeKaikkiMokit().size();
+
+            if (paiviaYhteensa > 0 && mokkienMaara > 0) {
+                String kayttoasteSql = """
+                        SELECT SUM(DATEDIFF(lopetus_päivä, aloitus_päivä))
+                        FROM varaa WHERE aloitus_päivä >= ? AND lopetus_päivä <= ?
+                        """;
+                try (PreparedStatement pstmt = conn.prepareStatement(kayttoasteSql)) {
+                    pstmt.setDate(1, Date.valueOf(alkupvm));
+                    pstmt.setDate(2, Date.valueOf(loppupvm));
+                    ResultSet rs = pstmt.executeQuery();
+                    if (rs.next()) {
+                        double kaytetyt = rs.getDouble(1);
+                        kayttoaste = (kaytetyt / (paiviaYhteensa * mokkienMaara)) * 100;
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return new Raportointi(varaustenMaara, uudetAsiakkaat, palaavatAsiakkaat,
+                keskimaarainenPituus, kayttoaste, kokonaistulot);
+
+    }
 }
 
 

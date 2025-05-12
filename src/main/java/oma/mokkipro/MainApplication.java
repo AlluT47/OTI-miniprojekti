@@ -141,6 +141,16 @@ public class MainApplication extends Application {
 
 
     /**
+     * Asettaa asiakkaan tiedot-näkymän elementit tyhjiksi.
+     */
+    private void resetCustomerInfoTextFields(){
+        customerNameTextField.setText("");
+        customerPhoneTextField.setText("");
+        customerEmailTextField.setText("");
+        customerTypeTextField.setText("");
+    }
+
+    /**
      * Muuttaa asiakkaan tietoja tietokannassa. Ottaa uudet arvot käyttöliittymästä.
      */
     private void confirmCustomerInfo(){
@@ -654,7 +664,26 @@ public class MainApplication extends Application {
         /*
         Asiakkaan poiston varmistaminen
          */
-        Pane confirmDeleteCustomer = new Pane();
+        Pane confirmRemoveCustomer = new Pane();
+        GridPane confirmRemoveGridPane = new GridPane();
+
+        Text removeInfoText = new Text("Asiakkaan poistaminen on lopullista. \nHaluatko poistaa asiakkaan järjestelmästä?");
+
+        Button cancelRemoveButton = new Button("Peruuta");
+        Button acceptRemoveButton = new Button("Kyllä, poista asiakas");
+
+        confirmRemoveGridPane.setHgap(30);
+        confirmRemoveGridPane.setVgap(30);
+
+        confirmRemoveGridPane.add(removeInfoText, 1, 0);
+        confirmRemoveGridPane.add(cancelRemoveButton, 0,1);
+        confirmRemoveGridPane.add(acceptRemoveButton, 2,1);
+
+        confirmRemoveCustomer.getChildren().add(confirmRemoveGridPane);
+        confirmRemoveGridPane.relocate(200,200);
+
+        mainPane.getChildren().add(confirmRemoveCustomer);
+        confirmRemoveCustomer.setVisible(false);
 
         /*
         Mökin tiedot
@@ -1089,6 +1118,7 @@ public class MainApplication extends Application {
         });
 
         addCustomerButton.setOnAction(e->{
+            resetCustomerInfoTextFields();
             customers.setVisible(false);
             customerEdit.setVisible(true);
             editCustomer = false;
@@ -1112,10 +1142,20 @@ public class MainApplication extends Application {
             setCustomerToBeChanged();
         });
 
-        removeCustomerButton.setOnAction(e->{
-            customerInfo.setVisible(false);
+        acceptRemoveButton.setOnAction(e->{
+            confirmRemoveCustomer.setVisible(false);
             customers.setVisible(true);
             removeCustomer();
+        });
+
+        cancelRemoveButton.setOnAction(e->{
+            confirmRemoveCustomer.setVisible(false);
+            customerInfo.setVisible(true);
+        });
+
+        removeCustomerButton.setOnAction(e->{
+            customerInfo.setVisible(false);
+            confirmRemoveCustomer.setVisible(true);
         });
 
         customerEditBackButton.setOnAction(e->{

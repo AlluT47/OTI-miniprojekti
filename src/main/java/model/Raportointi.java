@@ -1,30 +1,40 @@
 package model;
 
-import java.time.LocalDate;
-
 public class Raportointi {
-    private final String asiakas; // asiakkaan nimi
-    private final String mokki; // mökin nimi
-    private final LocalDate varauksenAlku; // varauksen alkupvm
-    private final LocalDate varauksenLoppu; // varauksen loppupvm
+    private int varaustenMaara; // varausten kokonaislukumäärä
+    private int uudetAsiakkaat; // uusien asiakkaiden lukumäärä
+    private int palaavatAsiakkaat; // palaavien asiakkaiden lukumäärä
+    private double keskimaarainenPituus; // varauksen keskimääräinen pituus
+    private double kayttoaste; // mökkien käyttöaste prosentteina
+    private double kokonaistulot; // kokonaistulot varauksista
 
-    public Raportointi(String asiakas, String mokki, LocalDate varauksenAlku, LocalDate varauksenLoppu) {
-        this.asiakas = asiakas;
-        this.mokki = mokki;
-        this.varauksenAlku = varauksenAlku;
-        this.varauksenLoppu = varauksenLoppu;
+    public Raportointi(int varaustenMaara, int uudetAsiakkaat, int palaavatAsiakkaat,
+                        double keskimaarainenPituus, double kayttoaste, double kokonaistulot) {
+            this.varaustenMaara = varaustenMaara;
+            this.uudetAsiakkaat = uudetAsiakkaat;
+            this.palaavatAsiakkaat = palaavatAsiakkaat;
+            this.keskimaarainenPituus = keskimaarainenPituus;
+            this.kayttoaste = kayttoaste;
+            this.kokonaistulot = kokonaistulot;
     }
 
-    public String getAsiakas() {
-        return asiakas;
+    // Getterit
+    public int getVaraustenMaara() { 
+        return varaustenMaara; 
     }
-    public String getMokki() {
-        return mokki;
+    public int getUudetAsiakkaat() { 
+        return uudetAsiakkaat; 
     }
-    public LocalDate getVarauksenAlku() {
-        return varauksenAlku;
+    public int getPalaavatAsiakkaat() { 
+        return palaavatAsiakkaat; 
     }
-    public LocalDate getVarauksenLoppu() {
-        return varauksenLoppu;
+    public double getKeskimaarainenPituus() {
+        return keskimaarainenPituus; 
+    }
+    public double getKayttoasteProsentti() { 
+        return kayttoaste; 
+    }
+    public double getKokonaistulot() { 
+        return kokonaistulot; 
     }
 }

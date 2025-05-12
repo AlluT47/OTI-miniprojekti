@@ -225,6 +225,86 @@ public class VarausDAO {
                 keskimaarainenPituus, kayttoaste, kokonaistulot);
 
     }
+
+    // Hakee yhteenvedon raportointiin valitun mökin osalta
+    public Raportointi haeYhteenvetoMokille(int mokkiId, LocalDate alkupvm, LocalDate loppupvm) {
+        int varaustenMaara = 0;
+        double kokonaistulot = 0;
+        double keskimaarainenPituus = 0;
+        double kayttoaste = 0;
+
+        String varauksetSql = "SELECT COUNT(*) FROM varaa WHERE mökki_id = ? AND aloitus_päivä >= ? AND lopetus_päivä <= ?";
+        String pituusSql = """
+                SELECT AVG(DATEDIFF(lopetus_päivä, aloitus_päivä))
+                FROM varaa WHERE mökki_id AND aloitus_päivä >= ? AND lopetus_päivä <= ?";
+                """;
+        String tulotSql = """
+                SELECT SUM(m.hinta_per_yö * DATEDIFF(v.lopetus_päivä, v.aloitus_päivä))
+                FROM varaa v JOIN mokki m ON v.mokki_id = m.id
+                WHERE v.mökki_id = ? AND v.aloitus_päivä >= ? AND v.lopetus_päivä <= ?
+                """;
+        String kayttoasteSql = """
+                SELECT SUM(DATEDIFF(lopetus_päivä, aloitus_päivä))
+                FROM varaa WHERE mökki_id = ? AND aloitus_päivä >= ? AND lopetus_päivä <= ?
+                """;
+
+        try (Connection conn = Tietokantayhteys.getConnection()) {
+
+            // Varausten lukumäärä
+            try (PreparedStatement pstmt = conn.prepareStatement(varauksetSql)) {
+                pstmt.setInt(1, mokkiId);
+                pstmt.setDate(2, Date.valueOf(alkupvm));
+                pstmt.setDate(3, Date.valueOf(loppupvm));
+                ResultSet rs = pstmt.executeQuery();
+                if (rs.next()) {
+                    varaustenMaara = rs.getInt(1);
+                }
+            }
+
+            // Varausten keskimääräinen pituus
+            try (PreparedStatement pstmt = conn.prepareStatement(pituusSql)) {
+                pstmt.setInt(1, mokkiId);
+                pstmt.setDate(2, Date.valueOf(alkupvm));
+                pstmt.setDate(3, Date.valueOf(loppupvm));
+                ResultSet rs = pstmt.executeQuery();
+                if (rs.next()) {
+                    keskimaarainenPituus = rs.getDouble(1);
+                }
+            }
+
+            // Kokonaistulot
+            try (PreparedStatement pstmt = conn.prepareStatement(tulotSql)) {
+                pstmt.setInt(1, mokkiId);
+                pstmt.setDate(2, Date.valueOf(alkupvm));
+                pstmt.setDate(3, Date.valueOf(loppupvm));
+                ResultSet rs = pstmt.executeQuery();
+                if (rs.next()) {
+                    kokonaistulot = rs.getDouble(1);
+                }
+            }
+
+            // Mökin käyttöaste
+            int paiviaYhteensa = (int) ChronoUnit.DAYS.between(alkupvm, alkupvm);
+            if (paiviaYhteensa > 0) {
+                try (PreparedStatement pstmt = conn.prepareStatement(kayttoasteSql)) {
+                    pstmt.setInt(1, mokkiId);
+                    pstmt.setDate(2, Date.valueOf(alkupvm));
+                    pstmt.setDate(3, Date.valueOf(loppupvm));
+                    ResultSet rs = pstmt.executeQuery();
+                    if (rs.next()) {
+                        double kaytetyt = rs.getDouble(1);
+                        kayttoaste = (kaytetyt / paiviaYhteensa) * 100;
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return new Raportointi(varaustenMaara, 0, 0, keskimaarainenPituus, kayttoaste, kokonaistulot);
+
+    }
 }
 
 

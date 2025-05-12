@@ -566,7 +566,7 @@ public class MainApplication extends Application {
                     return;
                 }
             }
-            
+
             vBox1.setVisible(mokkiSopii(m1, hakusana, maara, kaytaMaaraa));
             vBox2.setVisible(mokkiSopii(m2, hakusana, maara, kaytaMaaraa));
             vBox3.setVisible(mokkiSopii(m3, hakusana, maara, kaytaMaaraa));
@@ -603,12 +603,11 @@ public class MainApplication extends Application {
 
         Button lv = new Button("luo varaus");
         Button pv = new Button("poista varaus");
-        Button mmt = new Button("muuta mökin tietoja");
         Button peruuta = new Button("peruuta");
 
         VBox vBox = new VBox(15);
         vBox.setAlignment(Pos.CENTER);
-        vBox.getChildren().addAll(lv, pv, mmt);
+        vBox.getChildren().addAll(lv, pv);
 
         GridPane gridPane = new GridPane();
         gridPane.setAlignment(Pos.TOP_CENTER);
@@ -652,7 +651,6 @@ public class MainApplication extends Application {
         DatePicker saapumisPaiva = new DatePicker();
         DatePicker lahtoPaiva = new DatePicker();
 
-        Button uusiAsiakas = new Button("uusi asiakas");
         Button hyväksy = new Button("hyväksy varaus");
         Button peruuta = new Button("peruuta");
 

@@ -1,8 +1,15 @@
+CREATE DATABASE  IF NOT EXISTS `mokkimanagerpro`; 
+USE `mokkimanagerpro`;
 -- MySQL dump 10.13  Distrib 8.0.41, for Win64 (x86_64)
 --
 -- Host: 127.0.0.1    Database: mokkimanagerpro
 -- ------------------------------------------------------
 -- Server version	9.2.0
+
+
+--
+-- Table structure for table `asiakas`
+--
 
 DROP TABLE IF EXISTS `asiakas`;
 
@@ -14,16 +21,21 @@ CREATE TABLE `asiakas` (
   `asiakastyyppi` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `sposti` (`sposti`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+
+--
+-- Dumping data for table `asiakas`
+--
 
 LOCK TABLES `asiakas` WRITE;
+
+INSERT INTO `asiakas` VALUES (1,'Testi Suomalainen','testi.suomalainen@gmail.com','404005000','Yksityishenkilö'),(2,'Yrittäjä Virolainen','yrittaja.virolainen@gmail.com','504005000','Yritys'),(3,'Malli Ruotsalainen','malli.ruotsalainen@gmail.com','445006000','Yksityishenkilö');
 
 UNLOCK TABLES;
 
 --
--- Dumping data for table `asiakas`
+-- Table structure for table `laskut`
 --
 
 DROP TABLE IF EXISTS `laskut`;
@@ -37,42 +49,13 @@ CREATE TABLE `laskut` (
   PRIMARY KEY (`id`),
   KEY `varaus_id` (`varaus_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+
 
 --
 -- Dumping data for table `laskut`
 --
 
 LOCK TABLES `laskut` WRITE;
-/*!40000 ALTER TABLE `laskut` DISABLE KEYS */;
-/*!40000 ALTER TABLE `laskut` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `maksaa`
---
-
-DROP TABLE IF EXISTS `maksaa`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `maksaa` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `lasku_id` int DEFAULT NULL,
-  `asiakas_id` int DEFAULT NULL,
-  `maksutapa` varchar(50) DEFAULT NULL,
-  `maksu_aika` datetime DEFAULT NULL,
-  `summa` decimal(10,2) DEFAULT NULL,
-  `on_maksettu` tinyint(1) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `lasku_id` (`lasku_id`),
-  KEY `asiakas_id` (`asiakas_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `maksaa`
---
-
-LOCK TABLES `maksaa` WRITE;
 
 UNLOCK TABLES;
 
@@ -91,13 +74,16 @@ CREATE TABLE `mokki` (
   `kapasiteetti` int DEFAULT NULL,
   `on_vapaana` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 
 --
 -- Dumping data for table `mokki`
 --
 
 LOCK TABLES `mokki` WRITE;
+
+INSERT INTO `mokki` VALUES (1,'Isännän Tupa','Mökkitie 3, 80100 Joensuu','Neljän huoneen mökki järven rannalla',125.00,6,1),(2,'Emännän Tupa','Mökkitie 4 80100 Joensuu','Kolmen huoneen mökki järven rannalla',110.00,4,1),(3,'Talonpojan Pirtti','Mökkitie 6 80100 Joensuu','Pieni yhden huoneen mökki järven rannalla',80.00,2,1);
 
 UNLOCK TABLES;
 
@@ -106,7 +92,8 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `varaa`;
-
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `varaa` (
   `id` int NOT NULL AUTO_INCREMENT,
   `asiakas_id` int DEFAULT NULL,
@@ -119,7 +106,7 @@ CREATE TABLE `varaa` (
   KEY `asiakas_id` (`asiakas_id`),
   KEY `mökki_id` (`mökki_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `varaa`
@@ -129,4 +116,5 @@ LOCK TABLES `varaa` WRITE;
 
 UNLOCK TABLES;
 
--- Dump completed on 2025-04-30 12:44:36
+
+-- Dump completed on 2025-05-12 19:46:20

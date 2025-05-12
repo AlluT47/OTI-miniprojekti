@@ -1,17 +1,21 @@
 package oma.mokkipro;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+import java.time.LocalDate;
 
 public class MainApplication extends Application {
 
@@ -101,6 +105,8 @@ public class MainApplication extends Application {
 
         mainPane.getChildren().add(mainMenu);
         mainMenu.setVisible(false);
+
+        cottagesButton.setOnAction(e -> mokinVuokrauksenHallinat());
 
 
         /*
@@ -441,5 +447,359 @@ public class MainApplication extends Application {
         stage.setScene(scene);
         stage.setTitle("Mökki Manager Pro");
         stage.show();
+    }
+
+    //mökkien ja varausten hallinta
+    public void mokinVuokrauksenHallinat() {
+        Stage mokkiVarausStage = new Stage();
+
+        Mokki m1 = new Mokki("Kesäkatu 5", 708, 1303, 315, 862, 8);
+        Mokki m2 = new Mokki("Metsäkuja 7", 654, 1100, 205, 648, 6);
+        Mokki m3 = new Mokki("Rantatie 13", 408, 671, 186, 378, 3);
+        Mokki m4 = new Mokki("Lomatie 1", 315, 617, 150, 300, 2);
+        Mokki m5 = new Mokki("Kesäkatu 15", 540, 956, 156, 556, 4);
+        Mokki m6 = new Mokki("Kyläkatu 4", 589, 1000, 185, 614, 5);
+
+        Text hpt = new Text("Hakupalkki:");
+        Text hmt = new Text("Henkilomäärä:");
+
+        Text mokki1 = new Text(m1.toString());
+        Text mokki2 = new Text(m2.toString());
+        Text mokki3 = new Text(m3.toString());
+        Text mokki4 = new Text(m4.toString());
+        Text mokki5 = new Text(m5.toString());
+        Text mokki6 = new Text(m6.toString());
+
+
+        TextField hakupalkki = new TextField();
+        TextField henkilomaara = new TextField();
+
+        Image image1 = new Image("file:src/main/java/kuvat/Kuva1.jpg");
+        ImageView iv1 = new ImageView(image1);
+        iv1.setFitHeight(120);
+        iv1.setFitWidth(140);
+        Image image2 = new Image("file:src/main/java/kuvat/Kuva2.jpg");
+        ImageView iv2 = new ImageView(image2);
+        iv2.setFitHeight(120);
+        iv2.setFitWidth(140);
+        Image image3 = new Image("file:src/main/java/kuvat/Kuva3.jpg");
+        ImageView iv3 = new ImageView(image3);
+        iv3.setFitHeight(120);
+        iv3.setFitWidth(140);
+        Image image4 = new Image("file:src/main/java/kuvat/Kuva4.jpg");
+        ImageView iv4 = new ImageView(image4);
+        iv4.setFitHeight(120);
+        iv4.setFitWidth(140);
+        Image image5 = new Image("file:src/main/java/kuvat/Kuva5.jpg");
+        ImageView iv5 = new ImageView(image5);
+        iv5.setFitHeight(120);
+        iv5.setFitWidth(140);
+        Image image6 = new Image("file:src/main/java/kuvat/Kuva6.jpg");
+        ImageView iv6 = new ImageView(image6);
+        iv6.setFitHeight(120);
+        iv6.setFitWidth(140);
+
+        Button haku = new Button("Hae");
+        Button varaus1 = new Button("Varaa");
+        Button varaus2 = new Button("Varaa");
+        Button varaus3 = new Button("Varaa");
+        Button varaus4 = new Button("Varaa");
+        Button varaus5 = new Button("Varaa");
+        Button varaus6 = new Button("Varaa");
+
+        VBox vBox1 = new VBox(5);
+        vBox1.getChildren().addAll(iv1, mokki1, varaus1);
+        VBox vBox2 = new VBox(5);
+        vBox2.getChildren().addAll(iv2, mokki2, varaus2);
+        VBox vBox3 = new VBox(5);
+        vBox3.getChildren().addAll(iv3, mokki3, varaus3);
+        VBox vBox4 = new VBox(5);
+        vBox4.getChildren().addAll(iv4, mokki4, varaus4);
+        VBox vBox5 = new VBox(5);
+        vBox5.getChildren().addAll(iv5, mokki5, varaus5);
+        VBox vBox6 = new VBox(5);
+        vBox6.getChildren().addAll(iv6, mokki6, varaus6);
+
+        GridPane gridPane1 = new GridPane();
+        gridPane1.setVgap(5);
+        gridPane1.setHgap(10);
+        gridPane1.add(hpt, 0, 0);
+        gridPane1.add(hmt, 1, 0);
+        gridPane1.add(hakupalkki, 0, 1);
+        gridPane1.add(henkilomaara, 1, 1);
+        gridPane1.add(haku, 2, 1);
+
+        GridPane gridPane2 = new GridPane();
+        gridPane2.setAlignment(Pos.CENTER);
+        gridPane2.setVgap(10);
+        gridPane2.setHgap(10);
+        gridPane2.add(vBox1, 0, 2);
+        gridPane2.add(vBox2, 1, 2);
+        gridPane2.add(vBox3, 2, 2);
+        gridPane2.add(vBox4, 0, 3);
+        gridPane2.add(vBox5, 1, 3);
+        gridPane2.add(vBox6, 2, 3);
+
+        VBox vBox = new VBox(10);
+        vBox.getChildren().addAll(gridPane1, gridPane2);
+
+        varaus1.setOnAction(e -> mokinTiedot(m1, iv1.getImage()));
+        varaus2.setOnAction(e -> mokinTiedot(m2, iv2.getImage()));
+        varaus3.setOnAction(e -> mokinTiedot(m3, iv3.getImage()));
+        varaus4.setOnAction(e -> mokinTiedot(m4, iv4.getImage()));
+        varaus5.setOnAction(e -> mokinTiedot(m5, iv5.getImage()));
+        varaus6.setOnAction(e -> mokinTiedot(m6, iv6.getImage()));
+
+        haku.setOnAction(e -> {
+            String hakusana = hakupalkki.getText().toLowerCase();
+            String maaraTeksti = henkilomaara.getText().trim();
+            int maara = 0;
+            boolean kaytaMaaraa = false;
+
+            if (!maaraTeksti.isEmpty()) {
+                try {
+                    maara = Integer.parseInt(maaraTeksti);
+                    kaytaMaaraa = true;
+                } catch (NumberFormatException ex) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Syötä kelvollinen henkilömäärä");
+                    alert.show();
+                    return;
+                }
+            }
+
+            // Suodatusehto molemmilla ehdoilla
+            vBox1.setVisible(mokkiSopii(m1, hakusana, maara, kaytaMaaraa));
+            vBox2.setVisible(mokkiSopii(m2, hakusana, maara, kaytaMaaraa));
+            vBox3.setVisible(mokkiSopii(m3, hakusana, maara, kaytaMaaraa));
+            vBox4.setVisible(mokkiSopii(m4, hakusana, maara, kaytaMaaraa));
+            vBox5.setVisible(mokkiSopii(m5, hakusana, maara, kaytaMaaraa));
+            vBox6.setVisible(mokkiSopii(m6, hakusana, maara, kaytaMaaraa));
+        });
+
+        Scene scene = new Scene(vBox, 600, 550);
+        mokkiVarausStage.setTitle("Varausohjelma");
+        mokkiVarausStage.setScene(scene);
+        mokkiVarausStage.show();
+    }
+
+    private boolean mokkiSopii(Mokki mokki, String hakusana, int maara, boolean kaytaMaaraa) {
+        boolean osoiteOsumat = hakusana.isEmpty() || mokki.getOsoite().toLowerCase().contains(hakusana);
+        boolean maaraOsumat = !kaytaMaaraa || mokki.getKoko() >= maara;
+        return osoiteOsumat && maaraOsumat;
+    }
+
+
+    //mökin tiedot
+    private void mokinTiedot(Mokki mokki, Image image) {
+        Stage varausStage = new Stage();
+
+        TextArea tiedot = new TextArea(mokki.toString());
+        tiedot.setPrefSize(250, 100);
+        tiedot.setEditable(false);
+
+        ImageView imageView = new ImageView(image);
+
+        ObservableList<Varaus> varaukset = FXCollections.observableArrayList();
+        ListView<Varaus> listView = new ListView<>(varaukset);
+
+        Button lv = new Button("luo varaus");
+        Button pv = new Button("poista varaus");
+        Button mmt = new Button("muuta mökin tietoja");
+        Button peruuta = new Button("peruuta");
+
+        VBox vBox = new VBox(15);
+        vBox.setAlignment(Pos.CENTER);
+        vBox.getChildren().addAll(lv, pv, mmt);
+
+        GridPane gridPane = new GridPane();
+        gridPane.setAlignment(Pos.TOP_CENTER);
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+        gridPane.add(tiedot, 0, 0);
+        gridPane.add(imageView, 1, 0);
+        gridPane.add(listView, 0, 1);
+        gridPane.add(vBox, 1, 1);
+        gridPane.add(peruuta, 0, 2);
+
+        lv.setOnAction(e -> varauksenHallinta(mokki, varaukset));
+
+        pv.setOnAction(e -> {
+            Varaus valittu = listView.getSelectionModel().getSelectedItem();
+            if (valittu != null) {
+                varaukset.remove(valittu);
+            }
+        });
+
+        peruuta.setOnAction(e -> varausStage.close());
+
+        Scene scene = new Scene(gridPane, 600, 550);
+        varausStage.setTitle("Mökin tiedot");
+        varausStage.setScene(scene);
+        varausStage.show();
+    }
+
+    //varauksen hallinta
+    private void varauksenHallinta(Mokki mokki, ObservableList<Varaus> varaukset) {
+        Stage vhStage = new Stage();
+
+        TextField mokkiOsoite = new TextField();
+        mokkiOsoite.setEditable(false);
+        mokkiOsoite.setText(mokki.getOsoite());
+
+        Text alt = new Text("asiakas lista");
+
+        ListView asiakasLista = new ListView();
+
+        DatePicker saapumisPaiva = new DatePicker();
+        DatePicker lahtoPaiva = new DatePicker();
+
+        Button uusiAsiakas = new Button("uusi asiakas");
+        Button hyväksy = new Button("hyväksy varaus");
+        Button peruuta = new Button("peruuta");
+
+        VBox vBox1 = new VBox(5);
+        vBox1.getChildren().addAll(alt, asiakasLista);
+
+        HBox hBox = new HBox(20);
+        hBox.getChildren().addAll(peruuta, hyväksy);
+
+        VBox vBox = new VBox(10);
+        vBox.getChildren().addAll(mokkiOsoite, vBox1, saapumisPaiva, lahtoPaiva, hBox);
+
+        hyväksy.setOnAction(e -> {
+            String osoite = mokkiOsoite.getText();
+            LocalDate meno = saapumisPaiva.getValue();
+            LocalDate tulo = lahtoPaiva.getValue();
+
+            if (osoite.isEmpty() || meno == null || tulo == null) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Tietoja puuttuu");
+                alert.show();
+            }
+            else {
+                Varaus uusi = new Varaus(osoite, meno, tulo, mokki);
+                varaukset.add(uusi);
+                vhStage.close();
+            }
+        });
+
+        peruuta.setOnAction(e -> vhStage.close());
+
+        Scene scene = new Scene(vBox, 600, 550);
+        vhStage.setTitle("Varauksen hallinta");
+        vhStage.setScene(scene);
+        vhStage.show();
+    }
+}
+
+class Mokki {
+    private String osoite;
+    private double vhMin;
+    private double vhMax;
+    private double vlhMin;
+    private double vlhMax;
+    private int koko;
+
+    public Mokki(String osoite, double vhMin, double vhMax,
+                 double vlhMin, double vlhMax, int koko) {
+        this.osoite = osoite;
+        this.vhMin = vhMin;
+        this.vhMax = vhMax;
+        this.vlhMin = vlhMin;
+        this.vlhMax = vlhMax;
+        this.koko = koko;
+    }
+
+    public String getOsoite() {
+        return osoite;
+    }
+    public void setOsoite(String osoite) {
+        this.osoite = osoite;
+    }
+
+    public double getVhMin() {
+        return vhMin;
+    }
+    public void setVhMin(double vhMin) {
+        this.vhMin = vhMin;
+    }
+
+    public double getVhMax() {
+        return vhMax;
+    }
+    public void setVhMax(double vhMax) {
+        this.vhMax = vhMax;
+    }
+
+    public double getVlhMin() {
+        return vlhMin;
+    }
+    public void setVlhMin(double vlhMin) {
+        this.vlhMin = vlhMin;
+    }
+
+    public double getVlhMax() {
+        return vlhMax;
+    }
+    public void setVlhMax() {
+        this.vlhMax = vlhMax;
+    }
+    public int getKoko() {
+        return koko;
+    }
+    public void setKoko(int koko) {
+        this.koko = koko;
+    }
+
+    @Override
+    public String toString() {
+        return "Osoite: " + osoite + "\n" + "Viikkohinta: " + vhMin + " - " + vhMax + "€\n" +
+                "Viikonloppuhinta: " + vlhMin + " - " + vlhMax + "€\n" + "Henkilömäärä: " + koko + " Henkilöä";
+    }
+}
+
+class Varaus {
+    private String nimi;
+    private LocalDate meno;
+    private LocalDate tulo;
+    private Mokki mokki;
+
+    public Varaus(String nimi, LocalDate meno, LocalDate tulo, Mokki mokki) {
+        this.nimi = nimi;
+        this.meno = meno;
+        this.tulo = tulo;
+        this.mokki = mokki;
+    }
+
+    public String getNimi() {
+        return nimi;
+    }
+    public void setNimi(String nimi) {
+        this.nimi = nimi;
+    }
+
+    public LocalDate getMeno() {
+        return meno;
+    }
+    public void setMeno(LocalDate meno) {
+        this.meno = meno;
+    }
+
+    public LocalDate getTulo() {
+        return tulo;
+    }
+    public void setTulo(LocalDate tulo) {
+        this.tulo = tulo;
+    }
+
+    public Mokki getMokki() {
+        return mokki;
+    }
+    public void setMokki(Mokki mokki) {
+        this.mokki = mokki;
+    }
+
+    @Override
+    public String toString() {
+        return nimi + ": " + meno + " - " + tulo;
     }
 }

@@ -6,14 +6,16 @@ public class Mokki {
     private double vhMax;
     private double vlhMin;
     private double vlhMax;
+    private int koko;
 
     public Mokki(String osoite, double vhMin, double vhMax,
-                 double vlhMin, double vlhMax) {
+                 double vlhMin, double vlhMax, int koko) {
         this.osoite = osoite;
         this.vhMin = vhMin;
         this.vhMax = vhMax;
         this.vlhMin = vlhMin;
         this.vlhMax = vlhMax;
+        this.koko = koko;
     }
 
     public String getOsoite() {
@@ -50,10 +52,16 @@ public class Mokki {
     public void setVlhMax() {
         this.vlhMax = vlhMax;
     }
+    public int getKoko() {
+        return koko;
+    }
+    public void setKoko(int koko) {
+        this.koko = koko;
+    }
 
     @Override
     public String toString() {
         return "Osoite: " + osoite + "\n" + "Viikkohinta: " + vhMin + " - " + vhMax + "€\n" +
-                "Viikonloppuhinta: " + vlhMin + " - " + vlhMax + "€";
+                "Viikonloppuhinta: " + vlhMin + " - " + vlhMax + "€\n" + "Henkilömäärä: " + koko + " Henkilöä";
     }
 }

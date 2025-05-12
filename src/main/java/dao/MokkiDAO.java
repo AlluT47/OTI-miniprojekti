@@ -123,5 +123,34 @@ public class MokkiDAO {
 
             return null;
     }
+
+    // Hakee mökin nimellä
+    public Mokki haeMokkiNimella(String nimi) {
+        String sql = "SELECT * FROM mokki WHERE nimi = ?";
+    
+        try (Connection conn = Tietokantayhteys.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+    
+            pstmt.setString(1, nimi);
+            ResultSet rs = pstmt.executeQuery();
+    
+            if (rs.next()) {
+                return new Mokki(
+                    rs.getInt("id"),
+                    rs.getString("nimi"),
+                    rs.getString("osoite"),
+                    rs.getString("kuvaus"),
+                    rs.getDouble("hinta_per_yö"),
+                    rs.getInt("kapasiteetti"),
+                    rs.getBoolean("on_vapaana")
+                );
+            }
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    
+        return null;
+    }
     
 }

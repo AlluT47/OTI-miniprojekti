@@ -96,31 +96,6 @@ public class VarausDAO {
         }
     }
 
-    // Hakee kaikki majoitusvaraukset
-    public List<Raportointi> haeKaikkiMajoitukset() throws SQLException {
-        List<Raportointi> lista = new ArrayList<>();
-        String sql = """
-            SELECT a.nimi AS asiakas, m.nimi AS mokki, v.aloitus_päivä, v.lopetus_päivä
-            FROM varaa v
-            JOIN asiakas a ON v.asiakas_id = a.id
-            JOIN mokki m ON v.mokki_id = m.id
-            """;
-
-        try (Connection conn = Tietokantayhteys.getConnection();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql)) {
-            
-            while (rs.next()) {
-                lista.add(new Raportointi(
-                    rs.getString("asiakas"), 
-                    rs.getString("mokki"), 
-                    rs.getDate("varauksen_alku").toLocalDate(), 
-                    rs.getDate("varauksen_loppu").toLocalDate()));
-            }
-        }
-        return lista;
-    }
-
     // Hakee varaukset valitulle mökille
     public List<Varaus> haeVarauksetMokille(int mokkiId) {
         List<Varaus> varaukset = new ArrayList<>();

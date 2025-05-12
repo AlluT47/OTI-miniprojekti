@@ -566,8 +566,7 @@ public class MainApplication extends Application {
                     return;
                 }
             }
-
-            // Suodatusehto molemmilla ehdoilla
+            
             vBox1.setVisible(mokkiSopii(m1, hakusana, maara, kaytaMaaraa));
             vBox2.setVisible(mokkiSopii(m2, hakusana, maara, kaytaMaaraa));
             vBox3.setVisible(mokkiSopii(m3, hakusana, maara, kaytaMaaraa));

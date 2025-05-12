@@ -22,12 +22,12 @@ public class Kayttoliittyma extends Application {
     //mökkien ja varausten hallinta
     @Override
     public void start(Stage stage) {
-        Mokki m1 = new Mokki("Kesäkatu 5", 708, 1303, 315, 862);
-        Mokki m2 = new Mokki("Metsäkuja 7", 654, 1100, 205, 648);
-        Mokki m3 = new Mokki("Rantatie 13", 408, 671, 186, 378);
-        Mokki m4 = new Mokki("Lomatie 1", 315, 617, 150, 300);
-        Mokki m5 = new Mokki("Kesäkatu 15", 540, 956, 156, 556);
-        Mokki m6 = new Mokki("Kyläkatu 4", 589, 1000, 185, 614);
+        Mokki m1 = new Mokki("Kesäkatu 5", 708, 1303, 315, 862, 8);
+        Mokki m2 = new Mokki("Metsäkuja 7", 654, 1100, 205, 648, 6);
+        Mokki m3 = new Mokki("Rantatie 13", 408, 671, 186, 378, 3);
+        Mokki m4 = new Mokki("Lomatie 1", 315, 617, 150, 300, 2);
+        Mokki m5 = new Mokki("Kesäkatu 15", 540, 956, 156, 556, 4);
+        Mokki m6 = new Mokki("Kyläkatu 4", 589, 1000, 185, 614, 5);
 
         Text hpt = new Text("Hakupalkki:");
         Text hmt = new Text("Henkilomäärä:");
@@ -119,11 +119,44 @@ public class Kayttoliittyma extends Application {
         varaus5.setOnAction(e -> mokinTiedot(m5, iv5.getImage()));
         varaus6.setOnAction(e -> mokinTiedot(m6, iv6.getImage()));
 
-        Scene scene = new Scene(vBox, 600, 500);
+        haku.setOnAction(e -> {
+            String hakusana = hakupalkki.getText().toLowerCase();
+            String maaraTeksti = henkilomaara.getText().trim();
+            int maara = 0;
+            boolean kaytaMaaraa = false;
+
+            if (!maaraTeksti.isEmpty()) {
+                try {
+                    maara = Integer.parseInt(maaraTeksti);
+                    kaytaMaaraa = true;
+                } catch (NumberFormatException ex) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Syötä kelvollinen henkilömäärä");
+                    alert.show();
+                    return;
+                }
+            }
+
+            // Suodatusehto molemmilla ehdoilla
+            vBox1.setVisible(mokkiSopii(m1, hakusana, maara, kaytaMaaraa));
+            vBox2.setVisible(mokkiSopii(m2, hakusana, maara, kaytaMaaraa));
+            vBox3.setVisible(mokkiSopii(m3, hakusana, maara, kaytaMaaraa));
+            vBox4.setVisible(mokkiSopii(m4, hakusana, maara, kaytaMaaraa));
+            vBox5.setVisible(mokkiSopii(m5, hakusana, maara, kaytaMaaraa));
+            vBox6.setVisible(mokkiSopii(m6, hakusana, maara, kaytaMaaraa));
+        });
+
+        Scene scene = new Scene(vBox, 600, 550);
         stage.setTitle("Varausohjelma");
         stage.setScene(scene);
         stage.show();
     }
+
+    private boolean mokkiSopii(Mokki mokki, String hakusana, int maara, boolean kaytaMaaraa) {
+        boolean osoiteOsumat = hakusana.isEmpty() || mokki.getOsoite().toLowerCase().contains(hakusana);
+        boolean maaraOsumat = !kaytaMaaraa || mokki.getKoko() >= maara;
+        return osoiteOsumat && maaraOsumat;
+    }
+
 
     //mökin tiedot
     private void mokinTiedot(Mokki mokki, Image image) {
@@ -176,7 +209,7 @@ public class Kayttoliittyma extends Application {
 
         peruuta.setOnAction(e -> varausStage.close());
 
-        Scene scene = new Scene(gridPane, 600, 500);
+        Scene scene = new Scene(gridPane, 600, 550);
         varausStage.setTitle("Mökin tiedot");
         varausStage.setScene(scene);
         varausStage.show();
@@ -228,7 +261,7 @@ public class Kayttoliittyma extends Application {
 
         peruuta.setOnAction(e -> vhStage.close());
 
-        Scene scene = new Scene(vBox, 600, 500);
+        Scene scene = new Scene(vBox, 600, 550);
         vhStage.setTitle("Varauksen hallinta");
         vhStage.setScene(scene);
         vhStage.show();

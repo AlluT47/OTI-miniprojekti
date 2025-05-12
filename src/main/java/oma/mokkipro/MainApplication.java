@@ -23,6 +23,7 @@ import model.Asiakas;
 import model.Lasku;
 import model.Mokki;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -36,71 +37,174 @@ public class MainApplication extends Application {
     private ObservableList<String> invoicesList = FXCollections.observableArrayList();
     private ObservableList<String> customersList = FXCollections.observableArrayList();
     private ObservableList<String> cottageList = FXCollections.observableArrayList();
+    private ArrayList<String> customersIDList = new ArrayList<>();
 
+    //käyttöliittymän elementtejä, asiakas -näkymää varten
     private GridPane customer1GridPane, customer2GridPane, customer3GridPane, customer4GridPane, customer5GridPane,
             customer6GridPane, customer7GridPane, customer8GridPane, customer9GridPane;
 
     private Text customer1NameText, customer2NameText, customer3NameText, customer4NameText, customer5NameText,
             customer6NameText, customer7NameText, customer8NameText, customer9NameText;
 
+    //tämänhetkinen sivu, jolla asiakas -näkymässä ollaan
     private int currentCustomerPage = 0;
 
-    //hakee varausten idt ja eräpäivät listaan
+    //asiakkaan tietojen tarkastelu-näkymää varten
+    private Text customerNameText;
+    private TextArea customerInfoTextArea;
+
+    private TextField customerNameTextField;
+    private TextField customerPhoneTextField;
+    private TextField customerEmailTextField;
+    private TextField customerTypeTextField;
+
+    private boolean editCustomer;
+
+    //tällähetkellä valittu asiakas, jota tarkastellaan ja muokataan
+    private Asiakas currentCustomer;
+
+
+    private void setCustomerToBeChanged(){
+        customerNameTextField.setText(currentCustomer.getNimi());
+        customerPhoneTextField.setText(currentCustomer.getPuhelin());
+        customerEmailTextField.setText(currentCustomer.getSposti());
+        customerTypeTextField.setText(currentCustomer.getAsiakastyyppi());
+    }
+
+
+    /**
+     * Hakee tietokannasta varausten ID:t ja eräpäivät listaan
+     */
     private void fetchInvoiceIDs(){
-        LaskuDAO laskuDao = new LaskuDAO();
-        List<Lasku> laskuList = laskuDao.haeKaikkiLaskut();
+        LaskuDAO laskuDAO = new LaskuDAO();
+        List<Lasku> laskuList = laskuDAO.haeKaikkiLaskut();
         for(Lasku l:laskuList){
             invoicesList.add(l.getLaskuId() + ", " + l.getErapaiva());
         }
     }
 
-    //hakee asiakkaiden nimet listaan
+
+    /**
+     * Hakee tietokannasta asiakkaiden nimet ja ID:t listoihin.
+     */
     private void fetchCustomerNames(){
-        AsiakasDAO asiakasDao = new AsiakasDAO();
-        List<Asiakas> asiakasList = asiakasDao.haeKaikkiAsiakkaat();
+        customersList.clear();
+        customersIDList.clear();
+        AsiakasDAO asiakasDAO = new AsiakasDAO();
+        List<Asiakas> asiakasList = asiakasDAO.haeKaikkiAsiakkaat();
         for(Asiakas a:asiakasList){
+            customersIDList.add(String.valueOf(a.getAsiakasId()));
             customersList.add(a.getNimi());
+            System.out.println(a.getAsiakasId());
         }
     }
 
+
+    /**
+     * Hakee tietokannasta mökkien nimet listaan
+     */
     private void fetchCottageNames(){
-        MokkiDAO mokkiDao = new MokkiDAO();
-        List<Mokki> mokkiList = mokkiDao.haeKaikkiMokit();
+        MokkiDAO mokkiDAO = new MokkiDAO();
+        List<Mokki> mokkiList = mokkiDAO.haeKaikkiMokit();
         for(Mokki m:mokkiList){
             cottageList.add(m.getNimi());
+            System.out.println(m.getMokkiId());
         }
     }
 
+    /**
+     * Hakee tietyn ID:n omaavan asiakkaan tiedot tietokannasta, ja asettaa ne asiakkaan tiedot -näkymän elementteihin.
+     * @param id haettavan asiakkaan ID
+     */
+    private void fetchCustomerInfoFromID(int id){
+        AsiakasDAO asiakasDAO = new AsiakasDAO();
+        Asiakas a = asiakasDAO.haeAsiakasIdlla(id);
+        //asettaa nykyisen asiakkaan
+        currentCustomer = a;
+        //muuttaa käyttöliittymän elementtejä
+        customerNameText.setText(a.getNimi());
+        customerInfoTextArea.setText("Asiakkaan sähköposti: " + a.getSposti() +
+                "\nPuhelinnumero: " + a.getPuhelin() + "\nAsiakastyyppi: " + a.getAsiakastyyppi());
+    }
 
-    //laskujen listan hakemisen debuggausta varten
-//    private void createInvoices(){
-//        Random rnd = new Random();
-//        LaskuDAO ld = new LaskuDAO();
-//        for (int i = 0; i < 5; i++) {
-//            Lasku l = new Lasku(i, rnd.nextInt(), i*100, LocalDate.now(), LocalDateTime.now());
-//            ld.lisaaLasku(l);
-//        }
-//    }
 
-//    private void createCottages(){
-//        Random rnd = new Random();
-//        MokkiDAO md = new MokkiDAO();
-//        for (int i = 0; i < 5; i++) {
-//            Mokki m = new Mokki(i, "Mökki " + i, "Osoite", "Kuvasu", 100*i, rnd.nextInt(1,5), true);
-//            md.lisaaMokki(m);
-//        }
-//    }
+    /**
+     * Hakee asiakas -näkymässä tietyn indeksin asiakkaan ID:n. Palauttaa ID:n kokonaislukuna.
+     * @param selectedIndex valitun asiakkaan indeksi
+     * @return asiakkaan ID kokonaislukuna
+     */
+    private int fetchSelectedCustomerId(int selectedIndex){
+        String ID = customersIDList.get(selectedIndex + 9*currentCustomerPage - 1);
+        return Integer.parseInt(ID);
 
-//    private void createCustomers(){
-//        Random rnd = new Random();
-//        AsiakasDAO ad = new AsiakasDAO();
-//        for (int i = 0; i < 5; i++) {
-//            int rndint = rnd.nextInt();
-//            Asiakas a = new Asiakas(i, "Asiakas " + rndint, "sposti" + rndint + "@sposti.fi", "" + rndint, "yksityisasiakas");
-//            ad.lisaaAsiakas(a);
-//        }
-//    }
+    }
 
+
+    /**
+     * Muuttaa asiakkaan tietoja tietokannassa. Ottaa uudet arvot käyttöliittymästä.
+     */
+    private void confirmCustomerInfo(){
+
+        if(!editCustomer){
+            Random rnd = new Random();
+            currentCustomer = new Asiakas(rnd.nextInt(), "", "", "", "");
+        }
+
+        //nykyisen asiakkaan tietoja muutetaan
+        currentCustomer.setNimi(customerNameTextField.getText());
+        currentCustomer.setSposti(customerEmailTextField.getText());
+        currentCustomer.setPuhelin(customerPhoneTextField.getText());
+        currentCustomer.setAsiakastyyppi(customerTypeTextField.getText());
+
+        //uusi asiakasDAO
+        AsiakasDAO asiakasDAO = new AsiakasDAO();
+
+        if(editCustomer){
+            //päivitetään asiakas
+            asiakasDAO.paivitaAsiakas(currentCustomer);
+
+            //päivitetään asiakkaiden nimilista
+            int customerListIndex = customersIDList.indexOf(String.valueOf(currentCustomer.getAsiakasId()));
+            customersList.remove(customerListIndex);
+            customersList.add(customerListIndex, currentCustomer.getNimi());
+
+        } else {
+            //lisätään asiakas
+            asiakasDAO.lisaaAsiakas(currentCustomer);
+            customersIDList.add(String.valueOf(currentCustomer.getAsiakasId()));
+            customersList.add(currentCustomer.getNimi());
+        }
+
+        //päivitetään asiakas -näkymä
+        setCustomersPage(currentCustomerPage);
+
+        //päivitetään asiakkaan tiedot -näkymän elementit
+        customerNameText.setText(currentCustomer.getNimi());
+        customerInfoTextArea.setText("Asiakkaan sähköposti: " + currentCustomer.getSposti() +
+                "\nPuhelinnumero: " + currentCustomer.getPuhelin() + "\nAsiakastyyppi: "
+                + currentCustomer.getAsiakastyyppi());
+
+        //System.out.println("asiakas päivitetty!");
+    }
+
+
+    /**
+     * Poistaa nykyisen asiakkaan tietokannasta.
+     */
+    private void removeCustomer(){
+        int customerListIndex = customersIDList.indexOf(String.valueOf(currentCustomer.getAsiakasId()));
+        customersList.remove(customerListIndex);
+        customersIDList.remove(customerListIndex);
+        AsiakasDAO asiakasDAO = new AsiakasDAO();
+        asiakasDAO.poistaAsiakas(currentCustomer.getAsiakasId());
+        setCustomersPage(currentCustomerPage);
+        System.out.println("asiakas poistettu...");
+    }
+
+    /**
+     * Asettaa asiakas -näkymän asiakkaiden sivun annettuun lukuun.
+     * @param page uusi sivunumero kokonaislukuna
+     */
     private void setCustomersPage(int page){
         currentCustomerPage = page;
         //ensin kaikki asikaspanet piiloon
@@ -117,7 +221,7 @@ public class MainApplication extends Application {
         //käydään läpi sivun asiakkaat, indeksistä sivunnumero * 9 + 1 indeksiin (sivunnumero + 1) * 9 + 1 asti
         for (int i = page*9 + 1; i <(page+1)*9 +1 ; i++) {
             //jos indeksin jakojäännös on 1, ja listassa on tarpeeksi asiakkaita, laitetaan sivun ensimmäinen
-            //asiakas täksi asiakkaaksi, ja näytetään asiakaspane
+            //asiakas täksi asiakkaaksi, ja näytetään asiakaspane. sama muille kahdeksalle
             if(i%9 == 1 && customersList.size() >= i){
                 customer1NameText.setText(customersList.get(i-1));
                 customer1GridPane.setVisible(true);
@@ -444,6 +548,8 @@ public class MainApplication extends Application {
 
         Button customersBackButton = new Button("Takaisin");
 
+        Button addCustomerButton = new Button("Lisää asiakas");
+
         customerSearchGridPane.add(searchTextField, 0, 0);
         customerSearchGridPane.add(customerCountText, 1, 0);
         customerSearchGridPane.add(customerSearchButton, 2, 0);
@@ -455,11 +561,12 @@ public class MainApplication extends Application {
         customersBorderPane.setCenter(customersGridPane);
 
         customers.getChildren().addAll(customersBorderPane, customersBackButton,
-                previousPageButton, nextPageButton);
+                previousPageButton, nextPageButton, addCustomerButton);
         customersBorderPane.relocate(30, 50);
         previousPageButton.relocate(30, 400);
         nextPageButton.relocate(450, 400);
         customersBackButton.relocate(10,10);
+        addCustomerButton.relocate(230, 400);
 
         mainPane.getChildren().add(customers);
         customers.setVisible(false);
@@ -474,8 +581,8 @@ public class MainApplication extends Application {
 
         //elementit
         Button customerInfoBackButton = new Button("Takaisin");
-        Text customerNameText = new Text("Asiakkaan nimi");
-        TextArea customerInfoTextArea = new TextArea("Asiakkaan sähköposti: " +
+        customerNameText = new Text("Asiakkaan nimi");
+        customerInfoTextArea = new TextArea("Asiakkaan sähköposti: " +
                 "\nPuhelinnumero: \nOsoite: ");
         customerInfoTextArea.setEditable(false);
         Button changeCustomerInfoButton = new Button("Muuta tietoja");
@@ -509,11 +616,15 @@ public class MainApplication extends Application {
         Label customerNameLabel = new Label("Nimi:");
         Label customerPhoneLabel = new Label("Puhelinnumero:");
         Label customerEmailLabel = new Label("Sähköposti:");
-        Label customerAddressLabel = new Label("Osoite:");
-        TextField customerNameTextField = new TextField();
-        TextField customerPhoneTextField = new TextField();
-        TextField customerEmailTextField = new TextField();
-        TextArea customerAddressTextArea = new TextArea();
+        Label customerTypeLabel = new Label("Asiakastyyppi:");
+        customerNameTextField = new TextField();
+        customerPhoneTextField = new TextField();
+        customerEmailTextField = new TextField();
+        customerTypeTextField = new TextField();
+        customerNameTextField.setPrefWidth(200);
+        customerPhoneTextField.setPrefWidth(200);
+        customerEmailTextField.setPrefWidth(200);
+        customerTypeTextField.setPrefWidth(200);
         Button confirmCustomerEditButton = new Button("Hyväksy");
 
         //lisää elementit gridpaneen
@@ -523,8 +634,8 @@ public class MainApplication extends Application {
         customerEditGridPane.add(customerPhoneTextField, 1, 1);
         customerEditGridPane.add(customerEmailLabel, 0, 2);
         customerEditGridPane.add(customerEmailTextField, 1,2);
-        customerEditGridPane.add(customerAddressLabel, 0, 3);
-        customerEditGridPane.add(customerAddressTextArea, 1, 3);
+        customerEditGridPane.add(customerTypeLabel, 0, 3);
+        customerEditGridPane.add(customerTypeTextField, 1, 3);
 
         customerEditGridPane.setHgap(15);
         customerEditGridPane.setVgap(15);
@@ -540,6 +651,10 @@ public class MainApplication extends Application {
         mainPane.getChildren().add(customerEdit);
         customerEdit.setVisible(false);
 
+        /*
+        Asiakkaan poiston varmistaminen
+         */
+        Pane confirmDeleteCustomer = new Pane();
 
         /*
         Mökin tiedot
@@ -930,6 +1045,53 @@ public class MainApplication extends Application {
         customer1Button.setOnAction(e->{
             customers.setVisible(false);
             customerInfo.setVisible(true);
+            fetchCustomerInfoFromID(fetchSelectedCustomerId(1));
+        });
+        customer2Button.setOnAction(e->{
+            customers.setVisible(false);
+            customerInfo.setVisible(true);
+            fetchCustomerInfoFromID(fetchSelectedCustomerId(2));
+        });
+        customer3Button.setOnAction(e->{
+            customers.setVisible(false);
+            customerInfo.setVisible(true);
+            fetchCustomerInfoFromID(fetchSelectedCustomerId(3));
+        });
+        customer4Button.setOnAction(e->{
+            customers.setVisible(false);
+            customerInfo.setVisible(true);
+            fetchCustomerInfoFromID(fetchSelectedCustomerId(4));
+        });
+        customer5Button.setOnAction(e->{
+            customers.setVisible(false);
+            customerInfo.setVisible(true);
+            fetchCustomerInfoFromID(fetchSelectedCustomerId(5));
+        });
+        customer6Button.setOnAction(e->{
+            customers.setVisible(false);
+            customerInfo.setVisible(true);
+            fetchCustomerInfoFromID(fetchSelectedCustomerId(6));
+        });
+        customer7Button.setOnAction(e->{
+            customers.setVisible(false);
+            customerInfo.setVisible(true);
+            fetchCustomerInfoFromID(fetchSelectedCustomerId(7));
+        });
+        customer8Button.setOnAction(e->{
+            customers.setVisible(false);
+            customerInfo.setVisible(true);
+            fetchCustomerInfoFromID(fetchSelectedCustomerId(8));
+        });
+        customer9Button.setOnAction(e->{
+            customers.setVisible(false);
+            customerInfo.setVisible(true);
+            fetchCustomerInfoFromID(fetchSelectedCustomerId(9));
+        });
+
+        addCustomerButton.setOnAction(e->{
+            customers.setVisible(false);
+            customerEdit.setVisible(true);
+            editCustomer = false;
         });
 
         customerInfoBackButton.setOnAction(e->{
@@ -937,9 +1099,23 @@ public class MainApplication extends Application {
             customers.setVisible(true);
         });
 
+        confirmCustomerEditButton.setOnAction(e->{
+            customerEdit.setVisible(false);
+            customerInfo.setVisible(true);
+            confirmCustomerInfo();
+        });
+
         changeCustomerInfoButton.setOnAction(e->{
             customerInfo.setVisible(false);
             customerEdit.setVisible(true);
+            editCustomer = true;
+            setCustomerToBeChanged();
+        });
+
+        removeCustomerButton.setOnAction(e->{
+            customerInfo.setVisible(false);
+            customers.setVisible(true);
+            removeCustomer();
         });
 
         customerEditBackButton.setOnAction(e->{

@@ -2,6 +2,7 @@ package oma.mokkipro;
 import dao.AsiakasDAO;
 import dao.LaskuDAO;
 import dao.MokkiDAO;
+import dao.VarausDAO;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -22,7 +23,9 @@ import javafx.stage.Stage;
 import model.Asiakas;
 import model.Lasku;
 import model.Mokki;
+import model.Varaus;
 
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -58,10 +61,23 @@ public class MainApplication extends Application {
     private TextField customerEmailTextField;
     private TextField customerTypeTextField;
 
+    private TextField invoiceIDTextField;
+    private TextField invoiceCottageNameTextField;
+    private TextField invoiceCustomerNameTextField;
+    private TextField invoiceCustomerPhoneTextField;
+    private TextField invoiceArrivalDayTextField;
+    private TextField invoiceDepartureDayTextField;
+    private TextField invoiceDayAmountTextField;
+    private TextField invoiceCostPerNightTextField;
+    private TextField invoiceCostTextField;
+    private TextField invoiceDueDayTextField;
+
     private boolean editCustomer;
 
     //tällähetkellä valittu asiakas, jota tarkastellaan ja muokataan
     private Asiakas currentCustomer;
+
+    private Lasku currentInvoice;
 
 
     private void setCustomerToBeChanged(){
@@ -73,7 +89,7 @@ public class MainApplication extends Application {
 
 
     /**
-     * Hakee tietokannasta varausten ID:t ja eräpäivät listaan
+     * Hakee tietokannasta laskujen ID:t ja eräpäivät listaan
      */
     private void fetchInvoiceIDs(){
         LaskuDAO laskuDAO = new LaskuDAO();
@@ -139,6 +155,41 @@ public class MainApplication extends Application {
 
     }
 
+    /**
+     * Asettaa laskujen tarkastelun ListView-elementin valitun laskun tarkasteltavaksi laskuksi.
+     * @param listViewItem ListView:n valittu String
+     */
+    private void setCurrentInvoice(String listViewItem){
+        //laskun id listview alkioista
+        String invoiceID = listViewItem.substring(0,listViewItem.indexOf(","));
+
+        LaskuDAO laskuDAO = new LaskuDAO();
+        VarausDAO varausDAO = new VarausDAO();
+        MokkiDAO mokkiDAO = new MokkiDAO();
+        AsiakasDAO asiakasDAO = new AsiakasDAO();
+
+        //hae lasku
+        currentInvoice = laskuDAO.haeLaskuIdlla(Integer.parseInt(invoiceID));
+
+        //hae varaus, mökki ja asiakas
+        Varaus reservation = varausDAO.haeVarausIdlla(currentInvoice.getVarausId());
+        Mokki cottage = mokkiDAO.haeMokkiIdlla(reservation.getMokkiId());
+        Asiakas customer = asiakasDAO.haeAsiakasIdlla(reservation.getAsiakasId());
+
+        //aseta tiedot
+        invoiceIDTextField.setText(String.valueOf(currentInvoice.getLaskuId()));
+        invoiceCottageNameTextField.setText(String.valueOf(cottage.getNimi()));
+        invoiceCustomerNameTextField.setText(customer.getNimi());
+        invoiceCustomerPhoneTextField.setText(customer.getPuhelin());
+        invoiceArrivalDayTextField.setText(reservation.getVarauksenAlku().toString());
+        invoiceDepartureDayTextField.setText(reservation.getVarauksenLoppu().toString());
+        invoiceDayAmountTextField.setText(String.valueOf(Math.abs(ChronoUnit.DAYS.between(reservation.getVarauksenAlku(),
+                reservation.getVarauksenLoppu()) + 1)));
+        invoiceCostPerNightTextField.setText(String.valueOf(cottage.getHintaPerYö()));
+        invoiceCostTextField.setText(String.valueOf(Math.abs(ChronoUnit.DAYS.between(reservation.getVarauksenAlku(),
+                reservation.getVarauksenLoppu()) + 1)*cottage.getHintaPerYö()));
+        invoiceDueDayTextField.setText(String.valueOf(currentInvoice.getErapaiva()));
+    }
 
     /**
      * Asettaa asiakkaan tiedot-näkymän elementit tyhjiksi.
@@ -831,6 +882,11 @@ public class MainApplication extends Application {
         Button invoiceInfoButton = new Button("Laskun tiedot");
 
         ListView<String> invoicesListView = new ListView<>(invoicesList);
+
+        if(!invoicesListView.getItems().isEmpty()){
+            invoicesListView.getSelectionModel().select(0);
+        }
+
         Button invoiceBackButton = new Button("Takaisin");
 
         invoicesBorderPane.setLeft(invoicesListView);
@@ -868,16 +924,16 @@ public class MainApplication extends Application {
         Label invoiceCostLabel = new Label("Kokonaishinta:");
         Label invoiceDueDayLabel = new Label("Laskun eräpäivä:");
 
-        TextField invoiceIDTextField = new TextField();
-        TextField invoiceCottageNameTextField = new TextField();
-        TextField invoiceCustomerNameTextField = new TextField();
-        TextField invoiceCustomerPhoneTextField = new TextField();
-        TextField invoiceArrivalDayTextField = new TextField();
-        TextField invoiceDepartureDayTextField = new TextField();
-        TextField invoiceDayAmountTextField = new TextField();
-        TextField invoiceCostPerNightTextField = new TextField();
-        TextField invoiceCostTextField = new TextField();
-        TextField invoiceDueDayTextField = new TextField();
+        invoiceIDTextField = new TextField();
+        invoiceCottageNameTextField = new TextField();
+        invoiceCustomerNameTextField = new TextField();
+        invoiceCustomerPhoneTextField = new TextField();
+        invoiceArrivalDayTextField = new TextField();
+        invoiceDepartureDayTextField = new TextField();
+        invoiceDayAmountTextField = new TextField();
+        invoiceCostPerNightTextField = new TextField();
+        invoiceCostTextField = new TextField();
+        invoiceDueDayTextField = new TextField();
 
         invoiceIDTextField.setEditable(false);
         invoiceCottageNameTextField.setEditable(false);
@@ -1211,6 +1267,9 @@ public class MainApplication extends Application {
         invoiceInfoButton.setOnAction(e->{
             invoices.setVisible(false);
             invoiceInfo.setVisible(true);
+            if(invoicesListView.getSelectionModel().getSelectedItem() != null){
+                setCurrentInvoice(invoicesListView.getSelectionModel().getSelectedItem());
+            }
         });
 
         invoiceInfoBackButton.setOnAction(e->{

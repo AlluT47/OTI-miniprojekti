@@ -12,6 +12,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+import model.Lasku;
 import model.Raportointi;
 import model.Varaus;
 import util.Tietokantayhteys;
@@ -306,6 +307,34 @@ public class VarausDAO {
 
         return new Raportointi(varaustenMaara, 0, 0, keskimaarainenPituus, kayttoaste, kokonaistulot);
 
+    }
+
+
+    // Hakee varauksem id:llä
+    public Varaus haeVarausIdlla(int varausId) {
+        String sql = "SELECT * FROM varaa WHERE id = ?";
+
+        try (Connection conn = Tietokantayhteys.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, varausId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return new Varaus(
+                        rs.getInt("id"),
+                        rs.getInt("asiakas_id"),
+                        rs.getInt("mökki_id"),
+                        rs.getDate("aloitus_päivä").toLocalDate(),
+                        rs.getDate("lopetus_päivä").toLocalDate(),
+                        rs.getString("tila"),
+                        rs.getTimestamp("varaus_aika").toLocalDateTime());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }
 

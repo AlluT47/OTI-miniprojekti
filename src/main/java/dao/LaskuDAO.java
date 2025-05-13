@@ -5,6 +5,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import model.Asiakas;
 import model.Lasku;
 import util.Tietokantayhteys;
 
@@ -66,6 +67,31 @@ public class LaskuDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    // Hakee laskun id:llä
+    public Lasku haeLaskuIdlla(int laskuId) {
+        String sql = "SELECT * FROM laskut WHERE id = ?";
+
+        try (Connection conn = Tietokantayhteys.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, laskuId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return new Lasku(
+                        rs.getInt("id"),
+                        rs.getInt("varaus_id"),
+                        rs.getDouble("määrä"),
+                        rs.getDate("eräpäivä").toLocalDate(),
+                        rs.getTimestamp("luontiaika").toLocalDateTime());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 }

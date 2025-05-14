@@ -58,4 +58,5 @@ public class Varaus {
     public void setVarausAika(LocalDateTime varausAika){
         this.varausAika = varausAika;
     }
+    public void setAsiakasId(int asiakasId) {this.asiakasId = asiakasId; }
 }

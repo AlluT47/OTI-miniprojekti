@@ -20,6 +20,7 @@ import model.Lasku;
 import model.Mokki;
 import model.Varaus;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -328,14 +329,26 @@ public class MainApplication extends Application {
     private void confirmReservationInfo(){
         VarausDAO varausDAO = new VarausDAO();
 
+        //jos ei muokata varausta, niin luodaan uusi varaus
         if(!editReservation){
 
+            //hae asiakkaan id
             int customerID = Integer.parseInt(customersIDList.get(customersListView.getSelectionModel().getSelectedIndex()));
 
+            //luo varaus
             Varaus reservation = new Varaus(allReservationsCount + 1, customerID, currentCottage.getMokkiId(),
                     arrivalDayDatePicker.getValue(), departureDayDatePicker.getValue(), "", LocalDateTime.now());
-
+            //lisää varaus tietokantaan
             varausDAO.lisaaVaraus(reservation);
+
+            //lisätään lasku tietokantaan
+            Lasku invoice = new Lasku(invoicesList.size()+1, reservation.getVarausId(),
+                    currentCottage.getHintaPerYö()*ChronoUnit.DAYS.between(reservation.getVarauksenAlku(), reservation.getVarauksenLoppu()),
+                    LocalDate.now().plusWeeks(2), LocalDateTime.now());
+            LaskuDAO laskuDAO = new LaskuDAO();
+            laskuDAO.lisaaLasku(invoice);
+            invoicesList.add(invoice.getLaskuId() + ", " + invoice.getErapaiva());
+
         } else {
             currentReservation.setAsiakasId(Integer.parseInt(customersIDList.get(customersListView.getSelectionModel().getSelectedIndex())));
             currentReservation.setVarauksenAlku(arrivalDayDatePicker.getValue());

@@ -10,7 +10,12 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
@@ -25,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class MainApplication extends Application {
 
@@ -36,38 +42,28 @@ public class MainApplication extends Application {
     private ObservableList<String> invoicesList = FXCollections.observableArrayList();
     private ObservableList<String> customersList = FXCollections.observableArrayList();
     private ObservableList<String> cottageList = FXCollections.observableArrayList();
-    private ObservableList<String> reservationsList = FXCollections.observableArrayList();
     private ArrayList<String> customersIDList = new ArrayList<>();
-    private ArrayList<String> cottageIDList = new ArrayList<>();
-    private ArrayList<String> reservationIDList = new ArrayList<>();
+    private ObservableList<String> reservationsList = FXCollections.observableArrayList();
+    private ArrayList<String> reservationsIDList = new ArrayList<>();
 
-    private int allReservationsCount = 0;
-
-
-    //käyttöliittymän elementtejä, asiakas- ja mökki -näkymää varten
+    //käyttöliittymän elementtejä, asiakas -näkymää varten
     private GridPane customer1GridPane, customer2GridPane, customer3GridPane, customer4GridPane, customer5GridPane,
-            customer6GridPane, customer7GridPane, customer8GridPane, customer9GridPane,
-            cottage1GridPane, cottage2GridPane, cottage3GridPane, cottage4GridPane, cottage5GridPane,
-            cottage6GridPane, cottage7GridPane, cottage8GridPane, cottage9GridPane;
+            customer6GridPane, customer7GridPane, customer8GridPane, customer9GridPane;
 
     private Text customer1NameText, customer2NameText, customer3NameText, customer4NameText, customer5NameText,
-            customer6NameText, customer7NameText, customer8NameText, customer9NameText,
-            cottage1NameText, cottage2NameText, cottage3NameText, cottage4NameText, cottage5NameText,
-            cottage6NameText, cottage7NameText, cottage8NameText, cottage9NameText, cottageNameText;
+            customer6NameText, customer7NameText, customer8NameText, customer9NameText;
 
     //tämänhetkinen sivu, jolla asiakas -näkymässä ollaan
-    private int currentCustomerPage, currentCottagePage = 0;
-
-    private ListView<String> customersListView, reservationsListView;
+    private int currentCustomerPage = 0;
 
     //asiakkaan tietojen tarkastelu-näkymää varten
     private Text customerNameText;
-    private TextArea customerInfoTextArea, cottageInfoTextArea, descriptionTextArea, addressTextArea;
+    private TextArea customerInfoTextArea;
 
-    private TextField customerNameTextField, customerPhoneTextField, customerEmailTextField, customerTypeTextField,
-    cottageNameTextField, pricePerNightTextField, capacityTextField;
-
-    private DatePicker arrivalDayDatePicker, departureDayDatePicker;
+    private TextField customerNameTextField;
+    private TextField customerPhoneTextField;
+    private TextField customerEmailTextField;
+    private TextField customerTypeTextField;
 
     private TextField invoiceIDTextField;
     private TextField invoiceCottageNameTextField;
@@ -80,97 +76,34 @@ public class MainApplication extends Application {
     private TextField invoiceCostTextField;
     private TextField invoiceDueDayTextField;
 
-    private boolean editCustomer, editCottage, editReservation, createCustomerFromReservations;
+    // Varaus-luokan kentille vastaavat kentät käyttöliittymään
+    private TextField reservationIDTextField;
+    private TextField customerIDTextField;
+    private TextField cottageIDTextField;
+    private DatePicker reservationStartDatePicker;
+    private DatePicker reservationEndDatePicker;
+    private TextField statusTextField;
+    private TextField reservationTimeTextField;
 
-    //tällähetkellä valittu asiakas/mökki/lasku, jota tarkastellaan ja muokataan
+
+    private boolean editCustomer;
+
+    private boolean editReservatin;
+
+    //tällähetkellä valittu asiakas, jota tarkastellaan ja muokataan
     private Asiakas currentCustomer;
-    private Mokki currentCottage;
-    private Lasku currentInvoice;
+
+    //Tällähetkellä valittu varaus, jota tarkastellaan ja muokataan
     private Varaus currentReservation;
 
+    private Lasku currentInvoice;
 
-    /**
-     * Asettaa muuta asiakkaan tietoja -näkymän elementit nykyisen asiakkaan tietojen mukaisiksi
-     */
+
     private void setCustomerToBeChanged(){
         customerNameTextField.setText(currentCustomer.getNimi());
         customerPhoneTextField.setText(currentCustomer.getPuhelin());
         customerEmailTextField.setText(currentCustomer.getSposti());
         customerTypeTextField.setText(currentCustomer.getAsiakastyyppi());
-    }
-
-
-    /**
-     * Asettaa muuta mökin tietoja -näkymän elementit nykyisen mökin tietojen mukaisiksi
-     */
-    private void setCottageToBeChanged(){
-        cottageNameTextField.setText(currentCottage.getNimi());
-        addressTextArea.setText(currentCottage.getOsoite());
-        descriptionTextArea.setText(currentCottage.getKuvaus());
-        pricePerNightTextField.setText(String.valueOf(currentCottage.getHintaPerYö()));
-        capacityTextField.setText(String.valueOf(currentCottage.getKapasiteetti()));
-    }
-
-    /**
-     * Asettaa muuta varauksen tietoja -näkymän elementit nykyisen varauksen tietojen mukaisiksi
-     */
-    private void setReservationToBeChanged(){
-        arrivalDayDatePicker.setValue(currentReservation.getVarauksenAlku());
-        departureDayDatePicker.setValue(currentReservation.getVarauksenLoppu());
-        int customerIndex = customersIDList.indexOf(String.valueOf(currentReservation.getAsiakasId()));
-        System.out.println("asiakas: " + customersList.get(customerIndex));
-        customersListView.getSelectionModel().select(customerIndex);
-    }
-
-    /**
-     * Asettaa asiakkaan tiedot-näkymän elementit tyhjiksi.
-     */
-    private void resetCustomerInfoTextFields(){
-        customerNameTextField.setText("");
-        customerPhoneTextField.setText("");
-        customerEmailTextField.setText("");
-        customerTypeTextField.setText("");
-    }
-
-
-    /**
-     * Asettaa mökin tiedot-näkymän elementit tyhjiksi.
-     */
-    private void resetCottageInfoTextFields(){
-        cottageNameTextField.setText("");
-        addressTextArea.setText("");
-        descriptionTextArea.setText("");
-        pricePerNightTextField.setText("");
-        capacityTextField.setText("");
-    }
-
-
-    /**
-     * Asettaa varauksen tiedot-näkymän elementit tyhjiksi.
-     */
-    private void resetReservationInfoTextFields(){
-        arrivalDayDatePicker.getEditor().clear();
-        departureDayDatePicker.getEditor().clear();
-        if (!customersListView.getItems().isEmpty()) {
-            customersListView.getSelectionModel().select(0);
-        }
-    }
-
-    /**
-     * Päivittää mökin varausten listan mökin tiedot -näkymässä
-     */
-    private void refreshReservationsList(){
-        //tyhjennä lista
-        reservationsList.clear();
-        reservationIDList.clear();
-        VarausDAO varausDAO = new VarausDAO();
-        //hae varaukset
-        List<Varaus> cottagereservationsList = varausDAO.haeVarauksetMokille(currentCottage.getMokkiId());
-        //lisää varaukset listoihin
-        for(Varaus r:cottagereservationsList){
-            reservationsList.add(r.getVarauksenAlku() + " - " + r.getVarauksenLoppu());
-            reservationIDList.add(String.valueOf(r.getVarausId()));
-        }
     }
 
 
@@ -210,7 +143,6 @@ public class MainApplication extends Application {
         List<Mokki> mokkiList = mokkiDAO.haeKaikkiMokit();
         for(Mokki m:mokkiList){
             cottageList.add(m.getNimi());
-            cottageIDList.add(String.valueOf(m.getMokkiId()));
             System.out.println(m.getMokkiId());
         }
     }
@@ -228,54 +160,6 @@ public class MainApplication extends Application {
         customerNameText.setText(a.getNimi());
         customerInfoTextArea.setText("Asiakkaan sähköposti: " + a.getSposti() +
                 "\nPuhelinnumero: " + a.getPuhelin() + "\nAsiakastyyppi: " + a.getAsiakastyyppi());
-    }
-
-    /**
-     * Hakee tietyn ID:n omaavan mökin tiedot tietokannasta, ja asettaa ne mökin tiedot -näkymän elementteihin.
-     * @param cottageID haettavan mökin ID
-     */
-    private void fetchCottageInfoFromID(int cottageID){
-        MokkiDAO mokkiDAO = new MokkiDAO();
-        Mokki m = mokkiDAO.haeMokkiIdlla(cottageID);
-        //asettaa nykyisen mökin
-        currentCottage = m;
-        cottageNameText.setText("Mökki: " + m.getNimi());
-        //muuttaa käyttöliittymän elementtejä
-        cottageInfoTextArea.setText("Mökin nimi: " + m.getNimi() +  "\nOsoite: " + m.getOsoite() + "\nKuvaus: " +
-                m.getKuvaus() + "\nHinta per yö: " + m.getHintaPerYö() + "\nKapasiteetti: " + m.getKapasiteetti());
-    }
-
-    /**
-     * Hakee tietyn ID:n omaavan varauksen tiedot tietokannasta, ja asettaa ne varauksen tiedot -näkymän elementteihin.
-     * @param reservationID haettavan varauksen ID
-     */
-    private void fetchReservationInfoFromID(int reservationID){
-        VarausDAO varausDAO = new VarausDAO();
-        Varaus r = varausDAO.haeVarausIdlla(reservationID);
-        //asettaa nykyisen varauksen
-        System.out.println(r.getAsiakasId());
-        currentReservation = r;
-        //muuttaa käyttöliittymän elementtejä
-        setReservationToBeChanged();
-    }
-
-    /**
-     * Hakee mökit -näkymässä tietyn indeksin mökin ID:n. Palauttaa ID:n kokonaislukuna.
-     * @param selectedCottageIndex valitun mökin indeksi
-     * @return mökin ID kokonaislukuna
-     */
-    private int fetchSelectedCottageId(int selectedCottageIndex){
-        String ID = cottageIDList.get(selectedCottageIndex + 9*currentCottagePage - 1);
-        return Integer.parseInt(ID);
-    }
-
-
-    private void fetchAllReservationsCount(){
-        VarausDAO varausDAO = new VarausDAO();
-        List<Varaus> reservations = varausDAO.haeKaikkiVaraukset();
-        for(Varaus r:reservations){
-            allReservationsCount++;
-        }
     }
 
 
@@ -326,38 +210,14 @@ public class MainApplication extends Application {
         invoiceDueDayTextField.setText(String.valueOf(currentInvoice.getErapaiva()));
     }
 
-    private void confirmReservationInfo(){
-        VarausDAO varausDAO = new VarausDAO();
-
-        //jos ei muokata varausta, niin luodaan uusi varaus
-        if(!editReservation){
-
-            //hae asiakkaan id
-            int customerID = Integer.parseInt(customersIDList.get(customersListView.getSelectionModel().getSelectedIndex()));
-
-            //luo varaus
-            Varaus reservation = new Varaus(allReservationsCount + 1, customerID, currentCottage.getMokkiId(),
-                    arrivalDayDatePicker.getValue(), departureDayDatePicker.getValue(), "", LocalDateTime.now());
-            //lisää varaus tietokantaan
-            varausDAO.lisaaVaraus(reservation);
-
-            //lisätään lasku tietokantaan
-            Lasku invoice = new Lasku(invoicesList.size()+1, reservation.getVarausId(),
-                    currentCottage.getHintaPerYö()*ChronoUnit.DAYS.between(reservation.getVarauksenAlku(), reservation.getVarauksenLoppu()),
-                    LocalDate.now().plusWeeks(2), LocalDateTime.now());
-            LaskuDAO laskuDAO = new LaskuDAO();
-            laskuDAO.lisaaLasku(invoice);
-            invoicesList.add(invoice.getLaskuId() + ", " + invoice.getErapaiva());
-
-        } else {
-            currentReservation.setAsiakasId(Integer.parseInt(customersIDList.get(customersListView.getSelectionModel().getSelectedIndex())));
-            currentReservation.setVarauksenAlku(arrivalDayDatePicker.getValue());
-            currentReservation.setVarauksenLoppu(departureDayDatePicker.getValue());
-            currentReservation.setVarausAika(LocalDateTime.now());
-            varausDAO.paivitaVaraus(currentReservation);
-        }
-
-        refreshReservationsList();
+    /**
+     * Asettaa asiakkaan tiedot-näkymän elementit tyhjiksi.
+     */
+    private void resetCustomerInfoTextFields(){
+        customerNameTextField.setText("");
+        customerPhoneTextField.setText("");
+        customerEmailTextField.setText("");
+        customerTypeTextField.setText("");
     }
 
     /**
@@ -366,7 +226,8 @@ public class MainApplication extends Application {
     private void confirmCustomerInfo(){
 
         if(!editCustomer){
-            currentCustomer = new Asiakas(customersIDList.size()+1, "", "", "", "");
+            Random rnd = new Random();
+            currentCustomer = new Asiakas(rnd.nextInt(), "", "", "", "");
         }
 
         //nykyisen asiakkaan tietoja muutetaan
@@ -406,53 +267,6 @@ public class MainApplication extends Application {
         //System.out.println("asiakas päivitetty!");
     }
 
-    /**
-     * Muuttaa mökin tietoja tietokannassa. Ottaa uudet arvot käyttöliittymästä.
-     */
-    private void confirmCottageInfo(){
-
-        if(!editCottage){
-            currentCottage = new Mokki(cottageIDList.size()+1, "", "", "", 0, 0, true);
-        }
-
-        //nykyisen mökin tietoja muutetaan
-        currentCottage.setNimi(cottageNameTextField.getText());
-        currentCottage.setOsoite(addressTextArea.getText());
-        currentCottage.setKuvaus(descriptionTextArea.getText());
-        currentCottage.setHintaPerYö(Double.parseDouble(pricePerNightTextField.getText()));
-        currentCottage.setKapasiteetti(Integer.parseInt(capacityTextField.getText()));
-
-
-        //uusi mokkiDAO
-        MokkiDAO mokkiDAO = new MokkiDAO();
-
-        if(editCottage){
-            //päivitetään mökki
-            mokkiDAO.paivitaMokki(currentCottage);
-
-            //päivitetään mökkien nimilista
-            int cottageListIndex = cottageIDList.indexOf(String.valueOf(currentCottage.getMokkiId()));
-            cottageList.remove(cottageListIndex);
-            cottageList.add(cottageListIndex, currentCottage.getNimi());
-
-        } else {
-            //lisätään mökki
-            mokkiDAO.lisaaMokki(currentCottage);
-            cottageIDList.add(String.valueOf(currentCottage.getMokkiId()));
-            cottageList.add(currentCottage.getNimi());
-        }
-
-        //päivitetään mökki -näkymä
-        setCottagePage(currentCottagePage);
-
-        //päivitetään mökin tiedot -näkymän elementit
-
-        cottageInfoTextArea.setText("Mökin nimi: " + currentCottage.getNimi() +  "\nOsoite: "
-                + currentCottage.getOsoite() + "\nKuvaus: " + currentCottage.getKuvaus() + "\nHinta per yö: "
-                + currentCottage.getHintaPerYö() + "\nKapasiteetti: " + currentCottage.getKapasiteetti());
-        //System.out.println("mökki päivitetty!");
-    }
-
 
     /**
      * Poistaa nykyisen asiakkaan tietokannasta.
@@ -467,37 +281,11 @@ public class MainApplication extends Application {
         System.out.println("asiakas poistettu...");
     }
 
-
-    /**
-     * Poistaa nykyisen mökin tietokannasta.
-     */
-    private void removeCottage(){
-        int cottageListIndex = cottageIDList.indexOf(String.valueOf(currentCottage.getMokkiId()));
-        cottageList.remove(cottageListIndex);
-        cottageIDList.remove(cottageListIndex);
-        MokkiDAO mokkiDAO = new MokkiDAO();
-        mokkiDAO.poistaMokki(currentCottage.getMokkiId());
-        setCottagePage(currentCottagePage);
-        System.out.println("mökki poistettu...");
-    }
-
-
-    /**
-     * Poistaa nykyisen varauksen tietokannasta.
-     */
-    private void removeReservation(){
-        allReservationsCount--;
-        VarausDAO varausDAO = new VarausDAO();
-        varausDAO.poistaVaraus(Integer.parseInt(reservationIDList.get(reservationsListView.getSelectionModel().getSelectedIndex())));
-        refreshReservationsList();
-        System.out.println("varaus poistettu...");
-    }
-
     /**
      * Asettaa asiakas -näkymän asiakkaiden sivun annettuun lukuun.
      * @param page uusi sivunumero kokonaislukuna
      */
-    private void setCustomersPage(int page) {
+    private void setCustomersPage(int page){
         currentCustomerPage = page;
         //ensin kaikki asikaspanet piiloon
         customer1GridPane.setVisible(false);
@@ -511,110 +299,165 @@ public class MainApplication extends Application {
         customer9GridPane.setVisible(false);
 
         //käydään läpi sivun asiakkaat, indeksistä sivunnumero * 9 + 1 indeksiin (sivunnumero + 1) * 9 + 1 asti
-        for (int i = page * 9 + 1; i < (page + 1) * 9 + 1; i++) {
+        for (int i = page*9 + 1; i <(page+1)*9 +1 ; i++) {
             //jos indeksin jakojäännös on 1, ja listassa on tarpeeksi asiakkaita, laitetaan sivun ensimmäinen
             //asiakas täksi asiakkaaksi, ja näytetään asiakaspane. sama muille kahdeksalle
-            if (i % 9 == 1 && customersList.size() >= i) {
-                customer1NameText.setText(customersList.get(i - 1));
+            if(i%9 == 1 && customersList.size() >= i){
+                customer1NameText.setText(customersList.get(i-1));
                 customer1GridPane.setVisible(true);
-            }
-            if (i % 9 == 2 && customersList.size() >= i) {
-                customer2NameText.setText(customersList.get(i - 1));
+            }if(i%9 == 2 && customersList.size() >= i){
+                customer2NameText.setText(customersList.get(i-1));
                 customer2GridPane.setVisible(true);
-            }
-            if (i % 9 == 3 && customersList.size() >= i) {
-                customer3NameText.setText(customersList.get(i - 1));
+            }if(i%9 == 3 && customersList.size() >= i){
+                customer3NameText.setText(customersList.get(i-1));
                 customer3GridPane.setVisible(true);
-            }
-            if (i % 9 == 4 && customersList.size() >= i) {
-                customer4NameText.setText(customersList.get(i - 1));
+            }if(i%9 == 4 && customersList.size() >= i){
+                customer4NameText.setText(customersList.get(i-1));
                 customer4GridPane.setVisible(true);
-            }
-            if (i % 9 == 5 && customersList.size() >= i) {
-                customer5NameText.setText(customersList.get(i - 1));
+            }if(i%9 == 5 && customersList.size() >= i){
+                customer5NameText.setText(customersList.get(i-1));
                 customer5GridPane.setVisible(true);
-            }
-            if (i % 9 == 6 && customersList.size() >= i) {
-                customer6NameText.setText(customersList.get(i - 1));
+            }if(i%9 == 6 && customersList.size() >= i){
+                customer6NameText.setText(customersList.get(i-1));
                 customer6GridPane.setVisible(true);
-            }
-            if (i % 9 == 7 && customersList.size() >= i) {
-                customer7NameText.setText(customersList.get(i - 1));
+            }if(i%9 == 7 && customersList.size() >= i){
+                customer7NameText.setText(customersList.get(i-1));
                 customer7GridPane.setVisible(true);
-            }
-            if (i % 9 == 8 && customersList.size() >= i) {
-                customer8NameText.setText(customersList.get(i - 1));
+            }if(i%9 == 8 && customersList.size() >= i){
+                customer8NameText.setText(customersList.get(i-1));
                 customer8GridPane.setVisible(true);
-            }
-            if (i % 9 == 0 && customersList.size() >= i) {
-                customer9NameText.setText(customersList.get(i - 1));
+            }if(i%9 == 0 && customersList.size() >= i){
+                customer9NameText.setText(customersList.get(i-1));
                 customer9GridPane.setVisible(true);
             }
         }
     }
 
+    private void fetchReservationIDs() {
+        reservationsList.clear();
+        reservationsIDList.clear();
 
+        VarausDAO varausDAO = new VarausDAO();
+        List<Varaus> varaukset = varausDAO.haeKaikkiVaraukset();
 
-        /**
-         * Asettaa asiakas -näkymän asiakkaiden sivun annettuun lukuun.
-         * @param cottagePage uusi sivunumero kokonaislukuna
-         */
-        private void setCottagePage(int cottagePage){
-            currentCottagePage = cottagePage;
-            //ensin kaikki asikaspanet piiloon
-            cottage1GridPane.setVisible(false);
-            cottage2GridPane.setVisible(false);
-            cottage3GridPane.setVisible(false);
-            cottage4GridPane.setVisible(false);
-            cottage5GridPane.setVisible(false);
-            cottage6GridPane.setVisible(false);
-            cottage7GridPane.setVisible(false);
-            cottage8GridPane.setVisible(false);
-            cottage9GridPane.setVisible(false);
+        for (Varaus v : varaukset) {
+            reservationsIDList.add(String.valueOf(v.getVarausId()));
+            reservationsList.add(v.getVarausId() + ", " + v.getVarauksenAlku() + " - " + v.getVarauksenLoppu());
+        }
+    }
 
-            //käydään läpi sivun mökit, indeksistä sivunnumero * 6 + 1 indeksiin (sivunnumero + 1) * 6 + 1 asti
-            for (int i = cottagePage * 9 + 1; i < (cottagePage + 1) * 9 + 1; i++) {
-                //jos indeksin jakojäännös on 1, ja listassa on tarpeeksi mökkejä, laitetaan sivun ensimmäinen
-                //mökki täksi mökiksi, ja näytetään mökitpane. sama muille kuudelle
-                if (i % 9 == 1 && cottageList.size() >= i) {
-                    cottage1NameText.setText(cottageList.get(i - 1));
-                    cottage1GridPane.setVisible(true);
-                }
-                if (i % 9 == 2 && cottageList.size() >= i) {
-                    cottage2NameText.setText(cottageList.get(i - 1));
-                    cottage2GridPane.setVisible(true);
-                }
-                if (i % 9 == 3 && cottageList.size() >= i) {
-                    cottage3NameText.setText(cottageList.get(i - 1));
-                    cottage3GridPane.setVisible(true);
-                }
-                if (i % 9 == 4 && cottageList.size() >= i) {
-                    cottage4NameText.setText(cottageList.get(i - 1));
-                    cottage4GridPane.setVisible(true);
-                }
-                if (i % 9 == 5 && cottageList.size() >= i) {
-                    cottage5NameText.setText(cottageList.get(i - 1));
-                    cottage5GridPane.setVisible(true);
-                }
-                if (i % 9 == 6 && cottageList.size() >= i) {
-                    cottage6NameText.setText(cottageList.get(i - 1));
-                    cottage6GridPane.setVisible(true);
-                }
-                if (i % 9 == 7 && cottageList.size() >= i) {
-                    cottage7NameText.setText(cottageList.get(i - 1));
-                    cottage7GridPane.setVisible(true);
-                }
-                if (i % 9 == 8 && cottageList.size() >= i) {
-                    cottage8NameText.setText(cottageList.get(i - 1));
-                    cottage8GridPane.setVisible(true);
-                }
-                if (i % 9 == 0 && cottageList.size() >= i) {
-                    cottage9NameText.setText(cottageList.get(i - 1));
-                    cottage9GridPane.setVisible(true);
-                }
+    private void fetchReservationInfoFromID(int id) {
+        VarausDAO varausDAO = new VarausDAO();
+        Varaus v = varausDAO.haeVarausIdlla(id);
 
+        if (v != null) {
+            currentReservation = v;
+
+            reservationIDTextField.setText(String.valueOf(v.getVarausId()));
+            customerIDTextField.setText(String.valueOf(v.getAsiakasId()));
+            cottageIDTextField.setText(String.valueOf(v.getMokkiId()));
+            reservationStartDatePicker.setValue(v.getVarauksenAlku());
+            reservationEndDatePicker.setValue(v.getVarauksenLoppu());
+            statusTextField.setText(v.getTila());
+            reservationTimeTextField.setText(v.getVarausAika().toString());
+        } else {
+            System.out.println("Varausta ID:llä " + id + " ei löytynyt.");
+        }
+    }
+
+    private void confirmReservation() {
+        VarausDAO varausDAO = new VarausDAO();
+
+        if (!editReservatin) {
+            Random rnd = new Random();
+            currentReservation = new Varaus(
+                    rnd.nextInt(),
+                    Integer.parseInt(customerIDTextField.getText()),
+                    Integer.parseInt(cottageIDTextField.getText()),
+                    reservationStartDatePicker.getValue(),
+                    reservationEndDatePicker.getValue(),
+                    statusTextField.getText(),
+                    LocalDateTime.now()
+            );
+
+            varausDAO.lisaaVaraus(currentReservation);
+
+            reservationsList.add(currentReservation.getVarausId() + ", " +
+                    currentReservation.getVarauksenAlku() + " - " +
+                    currentReservation.getVarauksenLoppu());
+        } else {
+            currentReservation.setAsiakasId(Integer.parseInt(customerIDTextField.getText()));
+            currentReservation.setMokkiId(Integer.parseInt(cottageIDTextField.getText()));
+            currentReservation.setVarauksenAlku(reservationStartDatePicker.getValue());
+            currentReservation.setVarauksenLoppu(reservationEndDatePicker.getValue());
+            currentReservation.setTila(statusTextField.getText());
+
+            varausDAO.paivitaVaraus(currentReservation);
+
+            int index = reservationsIDList.indexOf(String.valueOf(currentReservation.getVarausId()));
+            if (index >= 0) {
+                reservationsList.set(index, currentReservation.getVarausId() + ", " +
+                        currentReservation.getVarauksenAlku() + " - " +
+                        currentReservation.getVarauksenLoppu());
             }
         }
+
+        reservationIDTextField.setText(String.valueOf(currentReservation.getVarausId()));
+        reservationTimeTextField.setText(currentReservation.getVarausAika().toString());
+    }
+
+    private void setCurrentReservation(String listViewItem) {
+        // Erotellaan varausID ennen pilkkua
+        String varausID = listViewItem.substring(0, listViewItem.indexOf(","));
+
+        VarausDAO varausDAO = new VarausDAO();
+        currentReservation = varausDAO.haeVarausIdlla(Integer.parseInt(varausID));
+
+        if (currentReservation != null) {
+            
+            reservationIDTextField.setText(String.valueOf(currentReservation.getVarausId()));
+            customerIDTextField.setText(String.valueOf(currentReservation.getAsiakasId()));
+            cottageIDTextField.setText(String.valueOf(currentReservation.getMokkiId()));
+            reservationStartDatePicker.setValue(currentReservation.getVarauksenAlku());
+            reservationEndDatePicker.setValue(currentReservation.getVarauksenLoppu());
+            statusTextField.setText(currentReservation.getTila());
+            reservationTimeTextField.setText(currentReservation.getVarausAika().toString());
+        } else {
+            System.out.println("Varausta ei löytynyt ID:llä " + varausID);
+        }
+    }
+
+
+    private void removeReservation() {
+        if (currentReservation == null) {
+            System.out.println("Ei valittua varausta poistettavaksi.");
+            return;
+        }
+
+        int index = reservationsIDList.indexOf(String.valueOf(currentReservation.getVarausId()));
+        if (index >= 0) {
+            
+            VarausDAO varausDAO = new VarausDAO();
+            varausDAO.poistaVaraus(currentReservation.getVarausId());
+
+            reservationsIDList.remove(index);
+            reservationsList.remove(index);
+
+            reservationIDTextField.clear();
+            customerIDTextField.clear();
+            cottageIDTextField.clear();
+            reservationStartDatePicker.setValue(null);
+            reservationEndDatePicker.setValue(null);
+            statusTextField.clear();
+            reservationTimeTextField.clear();
+
+            currentReservation = null;
+
+            System.out.println("Varaus poistettu.");
+        } else {
+            System.out.println("Varausta ei löytynyt listasta.");
+        }
+    }
 
 
     @Override
@@ -624,7 +467,6 @@ public class MainApplication extends Application {
         fetchInvoiceIDs();
         fetchCustomerNames();
         fetchCottageNames();
-        fetchAllReservationsCount();
 
         //pääpane
         Pane mainPane = new Pane();
@@ -1019,257 +861,25 @@ public class MainApplication extends Application {
         Asiakkaan poiston varmistaminen
          */
         Pane confirmRemoveCustomer = new Pane();
-        GridPane confirmRemoveCustomerGridPane = new GridPane();
+        GridPane confirmRemoveGridPane = new GridPane();
 
         Text removeInfoText = new Text("Asiakkaan poistaminen on lopullista. \nHaluatko poistaa asiakkaan järjestelmästä?");
 
-        Button cancelCustomerRemoveButton = new Button("Peruuta");
-        Button acceptCustomerRemoveButton = new Button("Kyllä, poista asiakas");
+        Button cancelRemoveButton = new Button("Peruuta");
+        Button acceptRemoveButton = new Button("Kyllä, poista asiakas");
 
-        confirmRemoveCustomerGridPane.setHgap(30);
-        confirmRemoveCustomerGridPane.setVgap(30);
+        confirmRemoveGridPane.setHgap(30);
+        confirmRemoveGridPane.setVgap(30);
 
-        confirmRemoveCustomerGridPane.add(removeInfoText, 1, 0);
-        confirmRemoveCustomerGridPane.add(cancelCustomerRemoveButton, 0,1);
-        confirmRemoveCustomerGridPane.add(acceptCustomerRemoveButton, 2,1);
+        confirmRemoveGridPane.add(removeInfoText, 1, 0);
+        confirmRemoveGridPane.add(cancelRemoveButton, 0,1);
+        confirmRemoveGridPane.add(acceptRemoveButton, 2,1);
 
-        confirmRemoveCustomer.getChildren().add(confirmRemoveCustomerGridPane);
-        confirmRemoveCustomerGridPane.relocate(200,200);
+        confirmRemoveCustomer.getChildren().add(confirmRemoveGridPane);
+        confirmRemoveGridPane.relocate(200,200);
 
         mainPane.getChildren().add(confirmRemoveCustomer);
         confirmRemoveCustomer.setVisible(false);
-
-        /*
-        Mökit
-         */
-        Pane cottages = new Pane();
-
-        BorderPane cottagesBorderPane = new BorderPane();
-        GridPane cottageSearchGridPane = new GridPane();
-        GridPane cottagesGridPane = new GridPane();
-
-        Pane cottage1Pane = new Pane();
-        Pane cottage2Pane = new Pane();
-        Pane cottage3Pane = new Pane();
-        Pane cottage4Pane = new Pane();
-        Pane cottage5Pane = new Pane();
-        Pane cottage6Pane = new Pane();
-        Pane cottage7Pane = new Pane();
-        Pane cottage8Pane = new Pane();
-        Pane cottage9Pane = new Pane();
-        cottage1GridPane = new GridPane();
-        cottage2GridPane = new GridPane();
-        cottage3GridPane = new GridPane();
-        cottage4GridPane = new GridPane();
-        cottage5GridPane = new GridPane();
-        cottage6GridPane = new GridPane();
-        cottage7GridPane = new GridPane();
-        cottage8GridPane = new GridPane();
-        cottage9GridPane = new GridPane();
-
-
-        //mökki 1
-
-        cottage1NameText = new Text("Mökki 1");
-        Button cottage1Button = new Button("Katso tietoja/varaa");
-
-        Rectangle cottage1BGRectangle = new Rectangle(140, 80);
-        cottage1BGRectangle.setFill(Color.WHITE);
-        cottage1BGRectangle.setStroke(Color.GREY);
-        cottage1GridPane.add(cottage1NameText, 0, 1);
-        cottage1GridPane.add(cottage1Button, 0, 2);
-
-        cottage1GridPane.setVgap(10);
-
-        cottage1Pane.getChildren().addAll(cottage1BGRectangle, cottage1GridPane);
-        cottage1GridPane.relocate(15, 0);
-        cottagesGridPane.add(cottage1Pane, 0, 0);
-
-       //mökki 2
-
-        cottage2NameText = new Text("Mökki 2");
-        Button cottage2Button = new Button("Katso tietoja/varaa");
-
-        Rectangle cottage2BGRectangle = new Rectangle(140, 80);
-        cottage2BGRectangle.setFill(Color.WHITE);
-        cottage2BGRectangle.setStroke(Color.GREY);
-        cottage2GridPane.add(cottage2NameText, 0, 1);
-        cottage2GridPane.add(cottage2Button, 0, 2);
-
-        cottage2GridPane.setVgap(10);
-
-        cottage2Pane.getChildren().addAll(cottage2BGRectangle, cottage2GridPane);
-        cottage2GridPane.relocate(15, 0);
-        cottagesGridPane.add(cottage2Pane, 1, 0);
-
-
-        //mökki 3
-
-        cottage3NameText = new Text("Mökki 3");
-        Button cottage3Button = new Button("Katso tietoja/varaa");
-
-        Rectangle cottage3BGRectangle = new Rectangle(140, 80);
-        cottage3BGRectangle.setFill(Color.WHITE);
-        cottage3BGRectangle.setStroke(Color.GREY);
-        cottage3GridPane.add(cottage3NameText, 0, 1);
-        cottage3GridPane.add(cottage3Button, 0, 2);
-
-        cottage3GridPane.setVgap(10);
-
-        cottage3Pane.getChildren().addAll(cottage3BGRectangle, cottage3GridPane);
-        cottage3GridPane.relocate(15, 0);
-        cottagesGridPane.add(cottage3Pane, 2, 0);
-
-        //mökki 4
-
-        cottage4NameText = new Text("Mökki 4");
-        Button cottage4Button = new Button("Katso tietoja/varaa");
-
-        Rectangle cottage4BGRectangle = new Rectangle(140, 80);
-        cottage4BGRectangle.setFill(Color.WHITE);
-        cottage4BGRectangle.setStroke(Color.GREY);
-        cottage4GridPane.add(cottage4NameText, 0, 1);
-        cottage4GridPane.add(cottage4Button, 0, 2);
-
-        cottage4GridPane.setVgap(10);
-
-        cottage4Pane.getChildren().addAll(cottage4BGRectangle, cottage4GridPane);
-        cottage4GridPane.relocate(15, 0);
-        cottagesGridPane.add(cottage4Pane, 0, 1);
-
-        //mökki 5
-
-        cottage5NameText = new Text("Mökki 5");
-        Button cottage5Button = new Button("Katso tietoja/varaa");
-
-        Rectangle cottage5BGRectangle = new Rectangle(140, 80);
-        cottage5BGRectangle.setFill(Color.WHITE);
-        cottage5BGRectangle.setStroke(Color.GREY);
-        cottage5GridPane.add(cottage5NameText, 0, 1);
-        cottage5GridPane.add(cottage5Button, 0, 2);
-
-        cottage5GridPane.setVgap(10);
-
-        cottage5Pane.getChildren().addAll(cottage5BGRectangle, cottage5GridPane);
-        cottage5GridPane.relocate(15, 0);
-        cottagesGridPane.add(cottage5Pane, 1, 1);
-
-        cottagesGridPane.setHgap(15);
-        cottagesGridPane.setVgap(15);
-
-        //mökki 6
-
-        cottage6NameText = new Text("Mökki 6");
-        Button cottage6Button = new Button("Katso tietoja/varaa");
-
-        Rectangle cottage6BGRectangle = new Rectangle(140, 80);
-        cottage6BGRectangle.setFill(Color.WHITE);
-        cottage6BGRectangle.setStroke(Color.GREY);
-        cottage6GridPane.add(cottage6NameText, 0, 1);
-        cottage6GridPane.add(cottage6Button, 0, 2);
-
-        cottage6GridPane.setVgap(10);
-
-        cottage6Pane.getChildren().addAll(cottage6BGRectangle, cottage6GridPane);
-        cottage6GridPane.relocate(15, 0);
-        cottagesGridPane.add(cottage6Pane, 2, 1);
-
-        //mökki 7
-
-        cottage7NameText = new Text("Mökki 7");
-        Button cottage7Button = new Button("Katso tietoja/varaa");
-
-        Rectangle cottage7BGRectangle = new Rectangle(140, 80);
-        cottage7BGRectangle.setFill(Color.WHITE);
-        cottage7BGRectangle.setStroke(Color.GREY);
-        cottage7GridPane.add(cottage7NameText, 0, 1);
-        cottage7GridPane.add(cottage7Button, 0, 2);
-
-        cottage7GridPane.setVgap(10);
-
-        cottage7Pane.getChildren().addAll(cottage7BGRectangle, cottage7GridPane);
-        cottage7GridPane.relocate(15, 0);
-        cottagesGridPane.add(cottage7Pane, 0, 2);
-
-        //mökki 8
-
-        cottage8NameText = new Text("Mökki 8");
-        Button cottage8Button = new Button("Katso tietoja/varaa");
-
-        Rectangle cottage8BGRectangle = new Rectangle(140, 80);
-        cottage8BGRectangle.setFill(Color.WHITE);
-        cottage8BGRectangle.setStroke(Color.GREY);
-        cottage8GridPane.add(cottage8NameText, 0, 1);
-        cottage8GridPane.add(cottage8Button, 0, 2);
-
-        cottage8GridPane.setVgap(10);
-
-        cottage8Pane.getChildren().addAll(cottage8BGRectangle, cottage8GridPane);
-        cottage8GridPane.relocate(15, 0);
-        cottagesGridPane.add(cottage8Pane, 1, 2);
-
-        //mökki 9
-
-        cottage9NameText = new Text("Mökki 9");
-        Button cottage9Button = new Button("Katso tietoja/varaa");
-
-        Rectangle cottage9BGRectangle = new Rectangle(140, 80);
-        cottage9BGRectangle.setFill(Color.WHITE);
-        cottage9BGRectangle.setStroke(Color.GREY);
-        cottage9GridPane.add(cottage9NameText, 0, 1);
-        cottage9GridPane.add(cottage9Button, 0, 2);
-
-        cottage9GridPane.setVgap(10);
-
-        cottage9Pane.getChildren().addAll(cottage9BGRectangle, cottage9GridPane);
-        cottage9GridPane.relocate(15, 0);
-        cottagesGridPane.add(cottage9Pane, 2, 2);
-
-        //mökkien haku
-        TextField cottageSearchTextField = new TextField();
-        Text cottageCountText = new Text("{henkilömäärä}");
-        Button cottageSearchButton = new Button("Hae");
-
-        Button previousCottagePageButton = new Button("Edellinen sivu");
-        Button nextCottagePageButton = new Button("Seuraava sivu");
-
-        previousCottagePageButton.setOnAction(e->{
-            if(currentCottagePage>= 1){
-                setCottagePage(currentCottagePage-1);
-            }
-        });
-
-        nextCottagePageButton.setOnAction(e->{
-            if(currentCottagePage + 1 <= cottageList.size()/6){
-                setCottagePage(currentCottagePage + 1);
-            }
-        });
-
-        Button cottagesBackButton = new Button("Takaisin");
-
-        Button addCottageButton = new Button("Lisää mökki");
-
-        cottageSearchGridPane.add(cottageSearchTextField, 0, 0);
-        cottageSearchGridPane.add(cottageCountText, 1, 0);
-        cottageSearchGridPane.add(cottageSearchButton, 2, 0);
-
-        cottageSearchGridPane.setHgap(15);
-        BorderPane.setMargin(cottagesGridPane, new Insets(15));
-
-        cottagesBorderPane.setTop(cottageSearchGridPane);
-        cottagesBorderPane.setCenter(cottagesGridPane);
-        cottages.getChildren().addAll(cottagesBorderPane, cottagesBackButton,
-        previousCottagePageButton, nextCottagePageButton, addCottageButton);
-        cottagesBorderPane.relocate(30, 50);
-        previousCottagePageButton.relocate(30, 400);
-        nextCottagePageButton.relocate(450, 400);
-        cottagesBackButton.relocate(10,10);
-        addCottageButton.relocate(230, 400);
-
-        mainPane.getChildren().add(cottages);
-        cottages.setVisible(true);
-        logIn.setVisible(false);
-
 
         /*
         Mökin tiedot
@@ -1282,27 +892,30 @@ public class MainApplication extends Application {
         Button editReservationButton = new Button("Muuta varausta");
         Button removeReservationButton = new Button("Poista varaus");
         Button editCottageInfoButton = new Button("Muuta mökin tietoja");
-        Button removeCottageButton = new Button("Poista mökki");
 
         cottageInfoButtonsGridPane.add(createReservationButton, 0,0);
         cottageInfoButtonsGridPane.add(editReservationButton, 0,1);
         cottageInfoButtonsGridPane.add(removeReservationButton, 0,2);
         cottageInfoButtonsGridPane.add(editCottageInfoButton, 0,3);
-        cottageInfoButtonsGridPane.add(removeCottageButton, 0,4);
 
         cottageInfoButtonsGridPane.setHgap(15);
         cottageInfoButtonsGridPane.setVgap(15);
 
+        Image placeholderImage = new Image(getClass().getResource("300x200.png").toString());
 
-        cottageInfoTextArea = new TextArea("Mökin nimi: \nOsoite: \nKuvaus: \nHinta per yö: \nKapasiteetti: ");
+        ImageView cottageImageView = new ImageView(placeholderImage);
+
+        TextArea cottageInfoTextArea = new TextArea("Mökin nimi: \nOsoite: \nKuvaus: \nHinta per yö: \nKapasiteetti: ");
         cottageInfoTextArea.setEditable(false);
 
-        reservationsListView = new ListView<String>(reservationsList);
+        ObservableList<String> reservationsList = FXCollections.observableArrayList("varaus1", "varaus2");
+        ListView<String> reservationsListView = new ListView<String>(reservationsList);
 
         Button cottageInfoBackButton = new Button("Takaisin");
 
 
         cottageInfoGridPane.add(cottageInfoTextArea, 0, 0);
+        cottageInfoGridPane.add(cottageImageView, 1, 0);
         cottageInfoGridPane.add(reservationsListView, 0, 1);
         cottageInfoGridPane.add(cottageInfoButtonsGridPane, 1, 1);
 
@@ -1316,98 +929,62 @@ public class MainApplication extends Application {
         mainPane.getChildren().add(cottageInfo);
         cottageInfo.setVisible(false);
 
-
         /*
-        Mökin poiston varmistaminen
-         */
-        Pane confirmRemoveCottage = new Pane();
-        GridPane confirmRemoveCottageGridPane = new GridPane();
-
-        Text removeCottageInfoText = new Text("Mökin poistaminen on lopullista. \nHaluatko poistaa mökin järjestelmästä?");
-
-        Button cancelCottageRemoveButton = new Button("Peruuta");
-        Button acceptCottageRemoveButton = new Button("Kyllä, poista mökki");
-
-        confirmRemoveCottageGridPane.setHgap(30);
-        confirmRemoveCottageGridPane.setVgap(30);
-
-        confirmRemoveCottageGridPane.add(removeCottageInfoText, 1, 0);
-        confirmRemoveCottageGridPane.add(cancelCottageRemoveButton, 0,1);
-        confirmRemoveCottageGridPane.add(acceptCottageRemoveButton, 2,1);
-
-        confirmRemoveCottage.getChildren().add(confirmRemoveCottageGridPane);
-        confirmRemoveCottageGridPane.relocate(200,200);
-
-        mainPane.getChildren().add(confirmRemoveCottage);
-        confirmRemoveCottage.setVisible(false);
-
-
-
-        /*
-        Varauksen hallinta
+         * Varauksen muokkaus / uusi varaus
          */
         Pane reservationEdit = new Pane();
         GridPane reservationEditGridPane = new GridPane();
 
-        cottageNameText = new Text("Mökin nimi");
+        Label reservationIDLabel = new Label("Varaus ID:");
+        TextField reservationIDTextField = new TextField();
 
-        Text reservationEditInfoText = new Text("Valitse asiakas listasta tai luo uusi asiakastieto:");
+        Label customerIDLabel = new Label("Asiakas ID:");
+        TextField customerIDTextField = new TextField();
 
-        customersListView = new ListView<>(customersList);
+        Label cottageIDLabel = new Label("Mökki ID:");
+        TextField cottageIDTextField = new TextField();
 
-        Button newCustomerButton = new Button("Uusi asiakas");
+        Label startDateLabel = new Label("Alkamispäivä:");
+        DatePicker reservationStartDatePicker = new DatePicker();
 
-        Label arrivalDayLabel = new Label("Saapumispäivä:");
-        Label departureDayLabel = new Label("Lähtöpäivä:");
-        arrivalDayDatePicker = new DatePicker();
-        departureDayDatePicker = new DatePicker();
-        Button reservationEditBackButton = new Button("Takaisin");
+        Label endDateLabel = new Label("Päättymispäivä:");
+        DatePicker reservationEndDatePicker = new DatePicker();
+
+        Label statusLabel = new Label("Status:");
+        TextField statusTextField = new TextField();
+
+        Label reservationTimeLabel = new Label("Varausaika:");
+        TextField reservationTimeTextField = new TextField();
+
         Button confirmReservationEditButton = new Button("Hyväksy");
+        Button reservationEditBackButton = new Button("Takaisin");
 
-        reservationEditGridPane.add(cottageNameText, 0, 0);
-        reservationEditGridPane.add(reservationEditInfoText, 0, 1);
-        reservationEditGridPane.add(customersListView, 0, 2);
-        reservationEditGridPane.add(newCustomerButton, 0, 3);
-        reservationEditGridPane.add(arrivalDayLabel, 0, 4);
-        reservationEditGridPane.add(arrivalDayDatePicker, 1, 4);
-        reservationEditGridPane.add(departureDayLabel, 0, 5);
-        reservationEditGridPane.add(departureDayDatePicker, 1, 5);
-        reservationEditGridPane.add(confirmReservationEditButton, 1, 6);
+// Lisää elementit GridPaneen
+        reservationEditGridPane.add(reservationIDLabel, 0, 0);
+        reservationEditGridPane.add(reservationIDTextField, 1, 0);
+        reservationEditGridPane.add(customerIDLabel, 0, 1);
+        reservationEditGridPane.add(customerIDTextField, 1, 1);
+        reservationEditGridPane.add(cottageIDLabel, 0, 2);
+        reservationEditGridPane.add(cottageIDTextField, 1, 2);
+        reservationEditGridPane.add(startDateLabel, 0, 3);
+        reservationEditGridPane.add(reservationStartDatePicker, 1, 3);
+        reservationEditGridPane.add(endDateLabel, 0, 4);
+        reservationEditGridPane.add(reservationEndDatePicker, 1, 4);
+        reservationEditGridPane.add(statusLabel, 0, 5);
+        reservationEditGridPane.add(statusTextField, 1, 5);
+        reservationEditGridPane.add(reservationTimeLabel, 0, 6);
+        reservationEditGridPane.add(reservationTimeTextField, 1, 6);
+        reservationEditGridPane.add(confirmReservationEditButton, 1, 7);
 
         reservationEditGridPane.setVgap(15);
+        reservationEditGridPane.setHgap(15);
 
         reservationEdit.getChildren().addAll(reservationEditGridPane, reservationEditBackButton);
-        reservationEditGridPane.relocate(30,50);
-        reservationEditBackButton.relocate(10,10);
+        reservationEditGridPane.relocate(30, 50);
+        reservationEditBackButton.relocate(10, 10);
 
         mainPane.getChildren().add(reservationEdit);
         reservationEdit.setVisible(false);
-
-
-        /*
-        Varauksen poiston varmistaminen
-         */
-        Pane confirmRemoveReservation = new Pane();
-        GridPane confirmRemoveReservationGridPane = new GridPane();
-
-        Text removeReservationInfoText = new Text("Varauksen poistaminen on lopullista. \nHaluatko poistaa varauksen järjestelmästä?");
-
-        Button cancelReservationRemoveButton = new Button("Peruuta");
-        Button acceptReservationRemoveButton = new Button("Kyllä, poista varaus");
-
-        confirmRemoveReservationGridPane.setHgap(30);
-        confirmRemoveReservationGridPane.setVgap(30);
-
-        confirmRemoveReservationGridPane.add(removeReservationInfoText, 1, 0);
-        confirmRemoveReservationGridPane.add(cancelReservationRemoveButton, 0,1);
-        confirmRemoveReservationGridPane.add(acceptReservationRemoveButton, 2,1);
-
-        confirmRemoveReservation.getChildren().add(confirmRemoveReservationGridPane);
-        confirmRemoveReservationGridPane.relocate(200,200);
-
-        mainPane.getChildren().add(confirmRemoveReservation);
-        confirmRemoveReservation.setVisible(false);
-
 
 
         /*
@@ -1422,11 +999,11 @@ public class MainApplication extends Application {
         Label pricePerNightLabel = new Label("Hinta yöltä:");
         Label capacityLabel = new Label("Kapasiteetti:");
 
-        cottageNameTextField = new TextField();
-        addressTextArea = new TextArea();
-        descriptionTextArea = new TextArea();
-        pricePerNightTextField = new TextField();
-        capacityTextField = new TextField();
+        TextField cottageNameTextField = new TextField();
+        TextArea addressTextArea = new TextArea();
+        TextArea descriptionTextArea = new TextArea();
+        TextField pricePerNightTextField = new TextField();
+        TextField capacityTextField = new TextField();
 
         Button confirmAddCottageButton = new Button("Hyväksy");
         Button addCottageBackButton = new Button("Takaisin");
@@ -1755,7 +1332,6 @@ public class MainApplication extends Application {
         });
 
         addCustomerButton.setOnAction(e->{
-            createCustomerFromReservations = false;
             resetCustomerInfoTextFields();
             customers.setVisible(false);
             customerEdit.setVisible(true);
@@ -1769,16 +1345,7 @@ public class MainApplication extends Application {
 
         confirmCustomerEditButton.setOnAction(e->{
             customerEdit.setVisible(false);
-            if(!createCustomerFromReservations){
-                if(!editCustomer){
-                    customers.setVisible(true);
-                    setCustomersPage(currentCustomerPage);
-                } else {
-                    customerInfo.setVisible(true);
-                }
-            } else {
-                reservationEdit.setVisible(true);
-            }
+            customerInfo.setVisible(true);
             confirmCustomerInfo();
         });
 
@@ -1789,13 +1356,13 @@ public class MainApplication extends Application {
             setCustomerToBeChanged();
         });
 
-        acceptCustomerRemoveButton.setOnAction(e->{
+        acceptRemoveButton.setOnAction(e->{
             confirmRemoveCustomer.setVisible(false);
             customers.setVisible(true);
             removeCustomer();
         });
 
-        cancelCustomerRemoveButton.setOnAction(e->{
+        cancelRemoveButton.setOnAction(e->{
             confirmRemoveCustomer.setVisible(false);
             customerInfo.setVisible(true);
         });
@@ -1805,34 +1372,9 @@ public class MainApplication extends Application {
             confirmRemoveCustomer.setVisible(true);
         });
 
-        removeCottageButton.setOnAction(e->{
-            cottageInfo.setVisible(false);
-            confirmRemoveCottage.setVisible(true);
-        });
-
-        cancelCottageRemoveButton.setOnAction(e->{
-            confirmRemoveCottage.setVisible(false);
-            cottageInfo.setVisible(true);
-        });
-
-        acceptCottageRemoveButton.setOnAction(e->{
-            confirmRemoveCottage.setVisible(false);
-            cottages.setVisible(true);
-            removeCottage();
-            setCottagePage(currentCottagePage);
-        });
-
         customerEditBackButton.setOnAction(e->{
             customerEdit.setVisible(false);
-            if(!createCustomerFromReservations){
-                if(!editCustomer){
-                    customers.setVisible(true);
-                } else {
-                    customerInfo.setVisible(true);
-                }
-            } else{
-                reservationEdit.setVisible(true);
-            }
+            customerInfo.setVisible(true);
         });
 
         customersBackButton.setOnAction(e->{
@@ -1842,87 +1384,22 @@ public class MainApplication extends Application {
 
         cottageInfoBackButton.setOnAction(e->{
             cottageInfo.setVisible(false);
-            cottages.setVisible(true);
-        });
-
-        addCottageButton.setOnAction(e->{
-            cottages.setVisible(false);
-            addCottage.setVisible(true);
-            editCottage = false;
-            resetCottageInfoTextFields();
+            mainMenu.setVisible(true);
         });
 
         cottagesButton.setOnAction(e->{
             mainMenu.setVisible(false);
-            cottages.setVisible(true);
-        });
-
-        cottagesBackButton.setOnAction(e->{
-            cottages.setVisible(false);
-            mainMenu.setVisible(true);
-        });
-
-        cottage1Button.setOnAction(e->{
-            cottages.setVisible(false);
             cottageInfo.setVisible(true);
-            fetchCottageInfoFromID(fetchSelectedCottageId(1));
-            refreshReservationsList();
-        });
-        cottage2Button.setOnAction(e->{
-            cottages.setVisible(false);
-            cottageInfo.setVisible(true);
-            fetchCottageInfoFromID(fetchSelectedCottageId(2));
-            refreshReservationsList();
-        });
-        cottage3Button.setOnAction(e->{
-            cottages.setVisible(false);
-            cottageInfo.setVisible(true);
-            fetchCottageInfoFromID(fetchSelectedCottageId(3));
-            refreshReservationsList();
-        });
-        cottage4Button.setOnAction(e->{
-            cottages.setVisible(false);
-            cottageInfo.setVisible(true);
-            fetchCottageInfoFromID(fetchSelectedCottageId(4));
-            refreshReservationsList();
-        });
-        cottage5Button.setOnAction(e->{
-            cottages.setVisible(false);
-            cottageInfo.setVisible(true);
-            fetchCottageInfoFromID(fetchSelectedCottageId(5));
-            refreshReservationsList();
-        });
-        cottage6Button.setOnAction(e->{
-            cottages.setVisible(false);
-            cottageInfo.setVisible(true);
-            fetchCottageInfoFromID(fetchSelectedCottageId(6));
-            refreshReservationsList();
         });
 
         createReservationButton.setOnAction(e->{
             cottageInfo.setVisible(false);
             reservationEdit.setVisible(true);
-            resetReservationInfoTextFields();
-            editReservation = false;
-        });
-
-        confirmReservationEditButton.setOnAction(e->{
-            confirmReservationInfo();
-            reservationEdit.setVisible(false);
-            cottageInfo.setVisible(true);
         });
 
         editReservationButton.setOnAction(e->{
-            editReservation = true;
             cottageInfo.setVisible(false);
             reservationEdit.setVisible(true);
-            fetchReservationInfoFromID(Integer.parseInt(reservationIDList.get(reservationsListView.getSelectionModel().getSelectedIndex())));
-        });
-
-        newCustomerButton.setOnAction(e->{
-            createCustomerFromReservations = true;
-            reservationEdit.setVisible(false);
-            customerEdit.setVisible(true);
         });
 
         reservationEditBackButton.setOnAction(e->{
@@ -1930,51 +1407,14 @@ public class MainApplication extends Application {
             cottageInfo.setVisible(true);
         });
 
-        removeReservationButton.setOnAction(e->{
-            cottageInfo.setVisible(false);
-            confirmRemoveReservation.setVisible(true);
-        });
-
-        acceptReservationRemoveButton.setOnAction(e->{
-            removeReservation();
-            confirmRemoveReservation.setVisible(false);
-            cottageInfo.setVisible(true);
-        });
-
-        cancelReservationRemoveButton.setOnAction(e->{
-            confirmRemoveReservation.setVisible(false);
-            cottageInfo.setVisible(true);
-        });
-
         editCottageInfoButton.setOnAction(e->{
             cottageInfo.setVisible(false);
             addCottage.setVisible(true);
-            editCottage = true;
-            setCottageToBeChanged();
         });
 
         addCottageBackButton.setOnAction(e->{
             addCottage.setVisible(false);
-            if(!editCottage){
-                cottages.setVisible(true);
-            } else {
-                cottageInfo.setVisible(true);
-            }
-        });
-
-        confirmAddCottageButton.setOnAction(e->{
-            if(!cottageNameTextField.getText().equals("") && !addressTextArea.getText().equals("")
-            && !descriptionTextArea.getText().equals("") && !pricePerNightTextField.getText().equals("")
-            && !capacityTextField.getText().equals("")){
-                addCottage.setVisible(false);
-                if(!editCottage){
-                    cottages.setVisible(true);
-                } else {
-                    cottageInfo.setVisible(true);
-                }
-                confirmCottageInfo();
-                setCottagePage(currentCottagePage);
-            }
+            cottageInfo.setVisible(true);
         });
 
         invoiceBackButton.setOnAction(e->{
@@ -2012,7 +1452,6 @@ public class MainApplication extends Application {
 
 
         setCustomersPage(0);
-        setCottagePage(0);
 
         /*
         scenen alustus
@@ -2022,7 +1461,4 @@ public class MainApplication extends Application {
         stage.setTitle("Mökki Manager Pro");
         stage.show();
     }
-
 }
-
-

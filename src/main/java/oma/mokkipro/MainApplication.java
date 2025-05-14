@@ -216,7 +216,7 @@ public class MainApplication extends Application {
      * @return mökin ID kokonaislukuna
      */
     private int fetchSelectedCottageId(int selectedCottageIndex){
-        String ID = cottageIDList.get(selectedCottageIndex + 6*currentCottagePage - 1);
+        String ID = cottageIDList.get(selectedCottageIndex + 9*currentCottagePage - 1);
         return Integer.parseInt(ID);
     }
 
@@ -1700,7 +1700,14 @@ public class MainApplication extends Application {
 
         cottageInfoBackButton.setOnAction(e->{
             cottageInfo.setVisible(false);
-            mainMenu.setVisible(true);
+            cottages.setVisible(true);
+        });
+
+        addCottageButton.setOnAction(e->{
+            cottages.setVisible(false);
+            addCottage.setVisible(true);
+            editCottage = false;
+            resetCottageInfoTextFields();
         });
 
         cottagesButton.setOnAction(e->{
@@ -1778,10 +1785,14 @@ public class MainApplication extends Application {
         });
 
         confirmAddCottageButton.setOnAction(e->{
-            addCottage.setVisible(false);
-            cottages.setVisible(true);
-            confirmCottageInfo();
-            setCottagePage(currentCottagePage);
+            if(!cottageNameTextField.getText().equals("") && !addressTextArea.getText().equals("")
+            && !descriptionTextArea.getText().equals("") && !pricePerNightTextField.getText().equals("")
+            && !capacityTextField.getText().equals("")){
+                addCottage.setVisible(false);
+                cottages.setVisible(true);
+                confirmCottageInfo();
+                setCottagePage(currentCottagePage);
+            }
         });
 
         invoiceBackButton.setOnAction(e->{

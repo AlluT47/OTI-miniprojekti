@@ -102,7 +102,7 @@ public class VarausDAO {
     // Hakee varaukset valitulle mökille
     public List<Varaus> haeVarauksetMokille(int mokkiId) {
         List<Varaus> varaukset = new ArrayList<>();
-        String sql = "SELECT * FROM varaa WHERE mökki_id = ? ORDER BY aloitus_päivä)";
+        String sql = "SELECT * FROM varaa WHERE mökki_id = ? ORDER BY aloitus_päivä";
 
         try (Connection conn = Tietokantayhteys.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)) {

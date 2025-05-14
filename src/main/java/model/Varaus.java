@@ -10,7 +10,7 @@ public class Varaus {
     private LocalDate varauksenAlku; // Varauksen alkupvm
     private LocalDate varauksenLoppu; // Varauksen loppupvm
     private String tila;
-    private LocalDateTime varausAika; 
+    private LocalDateTime varausAika;
 
     public Varaus(int varausId, int asiakasId, int mokkiId, LocalDate varauksenAlku, LocalDate varauksenLoppu, String tila, LocalDateTime varausAika) {
         this.varausId = varausId;
@@ -46,6 +46,15 @@ public class Varaus {
     }
 
     // Setterit
+    public void setAsiakasId(int asiakasId) {
+        this.asiakasId = asiakasId;
+    }
+    public void setVarausId(int varausId) {
+        this.varausId = varausId;
+    }
+    public void setMokkiId(int mokkiId) {
+        this.mokkiId = mokkiId;
+    }
     public void setVarauksenAlku(LocalDate varauksenAlku){
         this.varauksenAlku = varauksenAlku;
     }
@@ -58,5 +67,10 @@ public class Varaus {
     public void setVarausAika(LocalDateTime varausAika){
         this.varausAika = varausAika;
     }
-    public void setAsiakasId(int asiakasId) {this.asiakasId = asiakasId; }
+
+    @Override
+    public String toString() {
+        return "Varaus #" + varausId + " (" + varauksenAlku + " - " + varauksenLoppu + ")";
+    }
 }
+

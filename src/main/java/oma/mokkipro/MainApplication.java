@@ -1827,18 +1827,21 @@ public class MainApplication extends Application {
         });
 
         confirmCustomerEditButton.setOnAction(e->{
-            customerEdit.setVisible(false);
-            if(!createCustomerFromReservations){
-                if(!editCustomer){
-                    customers.setVisible(true);
-                    setCustomersPage(currentCustomerPage);
+            if(!customerNameTextField.getText().equals("") && !customerPhoneTextField.getText().equals("")
+            && !customerEmailTextField.getText().equals("") && !customerTypeTextField.getText().equals("")){
+                customerEdit.setVisible(false);
+                if(!createCustomerFromReservations){
+                    if(!editCustomer){
+                        customers.setVisible(true);
+                        setCustomersPage(currentCustomerPage);
+                    } else {
+                        customerInfo.setVisible(true);
+                    }
                 } else {
-                    customerInfo.setVisible(true);
+                    reservationEdit.setVisible(true);
                 }
-            } else {
-                reservationEdit.setVisible(true);
+                confirmCustomerInfo();
             }
-            confirmCustomerInfo();
         });
 
         changeCustomerInfoButton.setOnAction(e->{
@@ -1983,9 +1986,12 @@ public class MainApplication extends Application {
         });
 
         confirmReservationEditButton.setOnAction(e->{
-            confirmReservationInfo();
-            reservationEdit.setVisible(false);
-            cottageInfo.setVisible(true);
+            if(customersListView.getSelectionModel().getSelectedItem() != null && arrivalDayDatePicker.getValue()!=null
+            && departureDayDatePicker.getValue() != null){
+                confirmReservationInfo();
+                reservationEdit.setVisible(false);
+                cottageInfo.setVisible(true);
+            }
         });
 
         editReservationButton.setOnAction(e->{
@@ -2087,7 +2093,9 @@ public class MainApplication extends Application {
         });
 
         confirmReportButton.setOnAction(e->{
-            getReportInfo();
+            if(reportStartDatePicker.getValue()!=null && reportEndDatePicker.getValue()!=null){
+                getReportInfo();
+            }
         });
 
 

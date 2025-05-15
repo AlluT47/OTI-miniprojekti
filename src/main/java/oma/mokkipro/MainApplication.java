@@ -1995,10 +1995,13 @@ public class MainApplication extends Application {
         });
 
         editReservationButton.setOnAction(e->{
-            editReservation = true;
-            cottageInfo.setVisible(false);
-            reservationEdit.setVisible(true);
-            fetchReservationInfoFromID(Integer.parseInt(reservationIDList.get(reservationsListView.getSelectionModel().getSelectedIndex())));
+            if(reservationsListView.getSelectionModel().getSelectedItem()!=null){
+                editReservation = true;
+                cottageInfo.setVisible(false);
+                reservationEdit.setVisible(true);
+                fetchReservationInfoFromID(Integer.parseInt(reservationIDList.get(reservationsListView.getSelectionModel().getSelectedIndex())));
+
+            }
         });
 
         newCustomerButton.setOnAction(e->{

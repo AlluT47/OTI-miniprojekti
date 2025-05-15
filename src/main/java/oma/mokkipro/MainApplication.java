@@ -15,10 +15,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import model.Asiakas;
-import model.Lasku;
-import model.Mokki;
-import model.Varaus;
+import model.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -65,9 +62,15 @@ public class MainApplication extends Application {
     private TextArea customerInfoTextArea, cottageInfoTextArea, descriptionTextArea, addressTextArea;
 
     private TextField customerNameTextField, customerPhoneTextField, customerEmailTextField, customerTypeTextField,
-    cottageNameTextField, pricePerNightTextField, capacityTextField;
+    cottageNameTextField, pricePerNightTextField, capacityTextField, allReservationsTextField, customerAmountTextField,
+    returningCustomersTextField, reservationLengthTextField, cottageUsageTextField, incomeTextField,
+    cottageReservationsTextField, cottageReservationLengthTextField, cottageChosenUsageTextField, cottageIncomeTextField;
 
-    private DatePicker arrivalDayDatePicker, departureDayDatePicker;
+    private DatePicker arrivalDayDatePicker, departureDayDatePicker, reportStartDatePicker, reportEndDatePicker;
+
+    private RadioButton reportAllRadioButton;
+
+    private ComboBox<String> cottagesComboBox;
 
     private TextField invoiceIDTextField;
     private TextField invoiceCottageNameTextField;
@@ -289,6 +292,32 @@ public class MainApplication extends Application {
         return Integer.parseInt(ID);
 
     }
+
+
+    private void getReportInfo(){
+        VarausDAO varausDAO = new VarausDAO();
+        if(reportAllRadioButton.isSelected()){
+            //hae raportin tiedot
+            Raportointi report = varausDAO.haeYhteenvetoKaikista(reportStartDatePicker.getValue(), reportEndDatePicker.getValue());
+            //asetetaan käyttöliittymän elementteihin
+            allReservationsTextField.setText(String.valueOf(report.getVaraustenMaara()));
+            customerAmountTextField.setText(String.valueOf(report.getPalaavatAsiakkaat()));
+            returningCustomersTextField.setText(String.valueOf(report.getPalaavatAsiakkaat()));
+            reservationLengthTextField.setText(String.valueOf(report.getKeskimaarainenPituus()));
+            cottageUsageTextField.setText(report.getKayttoasteProsentti() + "%");
+            incomeTextField.setText(String.valueOf(report.getKokonaistulot()));
+        } else {
+            //hae raportin tiedot
+            int cottageID = Integer.parseInt(cottageIDList.get(cottagesComboBox.getSelectionModel().getSelectedIndex()));
+            Raportointi report = varausDAO.haeYhteenvetoMokille(cottageID, reportStartDatePicker.getValue(), reportEndDatePicker.getValue());
+            //asetetaan käyttöliittymän elementteihin
+            cottageReservationsTextField.setText(String.valueOf(report.getVaraustenMaara()));
+            cottageReservationLengthTextField.setText(String.valueOf(report.getKeskimaarainenPituus()));
+            cottageChosenUsageTextField.setText(report.getKayttoasteProsentti() + "%");
+            cottageIncomeTextField.setText(String.valueOf(report.getKokonaistulot()));
+        }
+    }
+
 
     /**
      * Asettaa laskujen tarkastelun ListView-elementin valitun laskun tarkasteltavaksi laskuksi.
@@ -629,48 +658,6 @@ public class MainApplication extends Application {
         //pääpane
         Pane mainPane = new Pane();
 
-        /*
-        Kirjautuminen
-         */
-        Pane logIn = new Pane();
-        GridPane logInGridPane = new GridPane();
-        BorderPane logInBorderPane = new BorderPane();
-
-        //elementit
-        Text titleText = new Text("Mökki Manager Pro");
-        Label userLabel = new Label("Käyttäjä:");
-        Label passwordLabel = new Label("Salasana:");
-        TextField userTextField = new TextField();
-        PasswordField passwordField = new PasswordField();
-        Button logInButton = new Button("Kirjaudu sisään");
-
-        //isompi fontti
-        titleText.setStyle("-fx-font: 32 arial;");
-
-        //lisää elementit kirjautumis- gridpaneen
-        logInGridPane.add(userLabel, 0, 1);
-        logInGridPane.add(userTextField, 1, 1);
-        logInGridPane.add(passwordLabel, 0, 2);
-        logInGridPane.add(passwordField, 1, 2);
-        logInGridPane.add(logInButton, 1, 3);
-
-        GridPane.setHalignment(userLabel, HPos.RIGHT);
-        GridPane.setHalignment(passwordLabel, HPos.RIGHT);
-
-        logInGridPane.setHgap(5);
-        logInGridPane.setVgap(15);
-
-        //lisää elementit borderpaneen
-        logInBorderPane.setTop(titleText);
-        logInBorderPane.setCenter(logInGridPane);
-
-        logIn.getChildren().add(logInBorderPane);
-        logInBorderPane.relocate(30, 50);
-
-        //kirjautumis -pane pääpaneen
-        mainPane.getChildren().add(logIn);
-        logIn.setVisible(true);
-
 
         /*
         Päävalikko
@@ -680,31 +667,34 @@ public class MainApplication extends Application {
         GridPane mainMenuGridPane = new GridPane();
 
         //elementit
-        Button logOutButton = new Button("Kirjaudu ulos");
         Button cottagesButton = new Button("Mökit ja varaukset");
         Button customersButton = new Button("Asiakkaat");
         Button invoicesButton = new Button("Laskut");
         Button reportsButton = new Button("Raportit");
+        Text titleText = new Text("Mökki Manager Pro");
+
+        //isompi fontti
+        titleText.setStyle("-fx-font: 32 arial;");
 
         cottagesButton.setPrefWidth(200);
         customersButton.setPrefWidth(200);
         invoicesButton.setPrefWidth(200);
         reportsButton.setPrefWidth(200);
 
-        mainMenuGridPane.add(cottagesButton, 0, 0);
-        mainMenuGridPane.add(customersButton, 0, 1);
-        mainMenuGridPane.add(invoicesButton, 0, 2);
-        mainMenuGridPane.add(reportsButton, 0, 3);
+        mainMenuGridPane.add(titleText, 0, 0);
+        mainMenuGridPane.add(cottagesButton, 0, 1);
+        mainMenuGridPane.add(customersButton, 0, 2);
+        mainMenuGridPane.add(invoicesButton, 0, 3);
+        mainMenuGridPane.add(reportsButton, 0, 4);
 
         mainMenuGridPane.setHgap(15);
         mainMenuGridPane.setVgap(15);
 
-        mainMenu.getChildren().addAll(mainMenuGridPane, logOutButton);
+        mainMenu.getChildren().addAll(mainMenuGridPane);
         mainMenuGridPane.relocate(30, 50);
-        logOutButton.relocate(10,10);
 
         mainPane.getChildren().add(mainMenu);
-        mainMenu.setVisible(false);
+        mainMenu.setVisible(true);
 
 
         /*
@@ -1267,8 +1257,7 @@ public class MainApplication extends Application {
         addCottageButton.relocate(230, 400);
 
         mainPane.getChildren().add(cottages);
-        cottages.setVisible(true);
-        logIn.setVisible(false);
+        cottages.setVisible(false);
 
 
         /*
@@ -1580,12 +1569,12 @@ public class MainApplication extends Application {
         Label cottageUsageLabel = new Label("Mökkien käyttöaste:");
         Label incomeLabel = new Label("Kokonaistulot:");
 
-        TextField allReservationsTextField = new TextField();
-        TextField customerAmountTextField = new TextField();
-        TextField returningCustomersTextField = new TextField();
-        TextField reservationLengthTextField = new TextField();
-        TextField cottageUsageTextField = new TextField();
-        TextField incomeTextField = new TextField();
+        allReservationsTextField = new TextField();
+        customerAmountTextField = new TextField();
+        returningCustomersTextField = new TextField();
+        reservationLengthTextField = new TextField();
+        cottageUsageTextField = new TextField();
+        incomeTextField = new TextField();
 
         //tekstikentät eivät ole muokattavissa
         allReservationsTextField.setEditable(false);
@@ -1614,10 +1603,10 @@ public class MainApplication extends Application {
         Label cottageChosenUsageLabel = new Label("Mökin käyttöaste:");
         Label cottageIncomeLabel = new Label("Kokonaistulot:");
 
-        TextField cottageReservationsTextField = new TextField();
-        TextField cottageReservationLengthTextField = new TextField();
-        TextField cottageChosenUsageTextField = new TextField();
-        TextField cottageIncomeTextField = new TextField();
+        cottageReservationsTextField = new TextField();
+        cottageReservationLengthTextField = new TextField();
+        cottageChosenUsageTextField = new TextField();
+        cottageIncomeTextField = new TextField();
 
         cottageReservationsTextField.setEditable(false);
         cottageReservationLengthTextField.setEditable(false);
@@ -1636,8 +1625,8 @@ public class MainApplication extends Application {
         chosenCottageReportGridPane.setVisible(false);
 
         //muut elementit
-        DatePicker reportStartDatePicker = new DatePicker();
-        DatePicker reportEndDatePicker = new DatePicker();
+        reportStartDatePicker = new DatePicker();
+        reportEndDatePicker = new DatePicker();
 
         Label reportStartLabel = new Label("Valitse ajanjakson alkupäivä:");
         Label reportEndLabel = new Label("Valitse ajanjakson loppupäivä:");
@@ -1645,10 +1634,11 @@ public class MainApplication extends Application {
         ToggleGroup reportOptionToggleGroup = new ToggleGroup();
 
         Button reportBackButton = new Button("Takaisin");
+        Button confirmReportButton = new Button("Tee raportti");
 
-        ComboBox<String> cottagesComboBox = new ComboBox<>(cottageList);
+        cottagesComboBox = new ComboBox<>(cottageList);
 
-        RadioButton reportAllRadioButton = new RadioButton();
+        reportAllRadioButton = new RadioButton();
         reportAllRadioButton.setToggleGroup(reportOptionToggleGroup);
         reportAllRadioButton.setSelected(true);
         reportAllRadioButton.setText("Kaikki");
@@ -1679,6 +1669,7 @@ public class MainApplication extends Application {
         reportOptionGridPane.add(reportAllRadioButton, 0, 2);
         reportOptionGridPane.add(reportCottageRadioButton, 1, 2);
         reportOptionGridPane.add(cottagesComboBox, 1, 3);
+        reportOptionGridPane.add(confirmReportButton, 0, 4);
 
         reports.getChildren().addAll(reportOptionGridPane, allCottagesReportGridPane, chosenCottageReportGridPane, reportBackButton);
         reportOptionGridPane.relocate(30,50);
@@ -1693,15 +1684,6 @@ public class MainApplication extends Application {
 
         //painikkeet
 
-        logInButton.setOnAction(e->{
-            logIn.setVisible(false);
-            mainMenu.setVisible(true);
-        });
-
-        logOutButton.setOnAction(e->{
-            mainMenu.setVisible(false);
-            logIn.setVisible(true);
-        });
 
         customersButton.setOnAction(e->{
             mainMenu.setVisible(false);
@@ -2008,6 +1990,10 @@ public class MainApplication extends Application {
         reportsButton.setOnAction(e->{
             mainMenu.setVisible(false);
             reports.setVisible(true);
+        });
+
+        confirmReportButton.setOnAction(e->{
+            getReportInfo();
         });
 
 

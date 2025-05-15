@@ -142,11 +142,11 @@ public class VarausDAO {
         String varauksetSql = "SELECT COUNT(*) FROM varaa WHERE aloitus_päivä >= ? AND lopetus_päivä <= ?";
         String pituusSql = """
                 SELECT AVG(DATEDIFF(lopetus_päivä, aloitus_päivä))
-                FROM varaa WHERE aloitus_päivä >= ? AND lopetus_päivä <= ?";
+                FROM varaa WHERE aloitus_päivä >= ? AND lopetus_päivä <= ?;
                 """;
         String tulotSql = """
                 SELECT SUM(m.hinta_per_yö * DATEDIFF(v.lopetus_päivä, v.aloitus_päivä))
-                FROM varaa v JOIN mokki m ON v.mokki_id = m.id
+                FROM varaa v JOIN mokki m ON v.mökki_id = m.id
                 WHERE v.aloitus_päivä >= ? AND v.lopetus_päivä <= ?
                 """;
         String asiakasSql = """
@@ -243,7 +243,7 @@ public class VarausDAO {
                 """;
         String tulotSql = """
                 SELECT SUM(m.hinta_per_yö * DATEDIFF(v.lopetus_päivä, v.aloitus_päivä))
-                FROM varaa v JOIN mokki m ON v.mokki_id = m.id
+                FROM varaa v JOIN mokki m ON v.mökki_id = m.id
                 WHERE v.mökki_id = ? AND v.aloitus_päivä >= ? AND v.lopetus_päivä <= ?
                 """;
         String kayttoasteSql = """

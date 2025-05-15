@@ -29,7 +29,7 @@ public class MainApplication extends Application {
         launch(args);
     }
 
-    //listat varauksista ja asiakkaista käyttöliittymää varten
+    //listat varauksista, mökeista, laskuista ja asiakkaista käyttöliittymää varten
     private ObservableList<String> invoicesList = FXCollections.observableArrayList();
     private ObservableList<String> customersList = FXCollections.observableArrayList();
     private ObservableList<String> cottageList = FXCollections.observableArrayList();
@@ -38,10 +38,11 @@ public class MainApplication extends Application {
     private ArrayList<String> cottageIDList = new ArrayList<>();
     private ArrayList<String> reservationIDList = new ArrayList<>();
 
+    //varausten kokonaismäärä, tarvitaan uusia varausidtä varten
     private int allReservationsCount = 0;
 
 
-    //käyttöliittymän elementtejä, asiakas- ja mökki -näkymää varten
+    //käyttöliittymän elementtejä
     private GridPane customer1GridPane, customer2GridPane, customer3GridPane, customer4GridPane, customer5GridPane,
             customer6GridPane, customer7GridPane, customer8GridPane, customer9GridPane,
             cottage1GridPane, cottage2GridPane, cottage3GridPane, cottage4GridPane, cottage5GridPane,
@@ -50,21 +51,18 @@ public class MainApplication extends Application {
     private Text customer1NameText, customer2NameText, customer3NameText, customer4NameText, customer5NameText,
             customer6NameText, customer7NameText, customer8NameText, customer9NameText,
             cottage1NameText, cottage2NameText, cottage3NameText, cottage4NameText, cottage5NameText,
-            cottage6NameText, cottage7NameText, cottage8NameText, cottage9NameText, cottageNameText;
-
-    //tämänhetkinen sivu, jolla asiakas -näkymässä ollaan
-    private int currentCustomerPage, currentCottagePage = 0;
+            cottage6NameText, cottage7NameText, cottage8NameText, cottage9NameText, cottageNameText, customerCountText;
 
     private ListView<String> customersListView, reservationsListView;
 
-    //asiakkaan tietojen tarkastelu-näkymää varten
-    private Text customerNameText;
+    private Text customerNameText, cottageCountText;
     private TextArea customerInfoTextArea, cottageInfoTextArea, descriptionTextArea, addressTextArea;
 
     private TextField customerNameTextField, customerPhoneTextField, customerEmailTextField, customerTypeTextField,
     cottageNameTextField, pricePerNightTextField, capacityTextField, allReservationsTextField, customerAmountTextField,
     returningCustomersTextField, reservationLengthTextField, cottageUsageTextField, incomeTextField,
-    cottageReservationsTextField, cottageReservationLengthTextField, cottageChosenUsageTextField, cottageIncomeTextField;
+    cottageReservationsTextField, cottageReservationLengthTextField, cottageChosenUsageTextField, cottageIncomeTextField,
+    searchTextField, cottageSearchTextField;
 
     private DatePicker arrivalDayDatePicker, departureDayDatePicker, reportStartDatePicker, reportEndDatePicker;
 
@@ -83,6 +81,11 @@ public class MainApplication extends Application {
     private TextField invoiceCostTextField;
     private TextField invoiceDueDayTextField;
 
+
+    //tämänhetkinen sivu, jolla asiakas -näkymässä ollaan
+    private int currentCustomerPage, currentCottagePage = 0;
+
+    //totuusarvoja kättöliittymän toimintaa varten
     private boolean editCustomer, editCottage, editReservation, createCustomerFromReservations;
 
     //tällähetkellä valittu asiakas/mökki/lasku, jota tarkastellaan ja muokataan
@@ -91,6 +94,9 @@ public class MainApplication extends Application {
     private Lasku currentInvoice;
     private Varaus currentReservation;
 
+    /*
+    Metodeja
+     */
 
     /**
      * Asettaa muuta asiakkaan tietoja -näkymän elementit nykyisen asiakkaan tietojen mukaisiksi
@@ -121,7 +127,6 @@ public class MainApplication extends Application {
         arrivalDayDatePicker.setValue(currentReservation.getVarauksenAlku());
         departureDayDatePicker.setValue(currentReservation.getVarauksenLoppu());
         int customerIndex = customersIDList.indexOf(String.valueOf(currentReservation.getAsiakasId()));
-        System.out.println("asiakas: " + customersList.get(customerIndex));
         customersListView.getSelectionModel().select(customerIndex);
     }
 
@@ -200,8 +205,8 @@ public class MainApplication extends Application {
         for(Asiakas a:asiakasList){
             customersIDList.add(String.valueOf(a.getAsiakasId()));
             customersList.add(a.getNimi());
-            System.out.println(a.getAsiakasId());
         }
+        customerCountText.setText(String.valueOf(customersList.size()));
     }
 
 
@@ -209,13 +214,15 @@ public class MainApplication extends Application {
      * Hakee tietokannasta mökkien nimet listaan
      */
     private void fetchCottageNames(){
+        cottageList.clear();
+        cottageIDList.clear();
         MokkiDAO mokkiDAO = new MokkiDAO();
         List<Mokki> mokkiList = mokkiDAO.haeKaikkiMokit();
         for(Mokki m:mokkiList){
             cottageList.add(m.getNimi());
             cottageIDList.add(String.valueOf(m.getMokkiId()));
-            System.out.println(m.getMokkiId());
         }
+        cottageCountText.setText(String.valueOf(cottageList.size()));
     }
 
     /**
@@ -256,7 +263,6 @@ public class MainApplication extends Application {
         VarausDAO varausDAO = new VarausDAO();
         Varaus r = varausDAO.haeVarausIdlla(reservationID);
         //asettaa nykyisen varauksen
-        System.out.println(r.getAsiakasId());
         currentReservation = r;
         //muuttaa käyttöliittymän elementtejä
         setReservationToBeChanged();
@@ -273,6 +279,9 @@ public class MainApplication extends Application {
     }
 
 
+    /**
+     * Hakee kaikkien varausten määrän
+     */
     private void fetchAllReservationsCount(){
         VarausDAO varausDAO = new VarausDAO();
         List<Varaus> reservations = varausDAO.haeKaikkiVaraukset();
@@ -294,6 +303,78 @@ public class MainApplication extends Application {
     }
 
 
+    /**
+     * Hakee asiakaslistasta vain haetut asiakkaat
+     */
+    private void filterSearchCustomers(){
+        fetchCustomerNames();
+
+        String searchTerm = searchTextField.getText();
+        ObservableList<String> newCustomerList = FXCollections.observableArrayList();
+        ArrayList<String> newCustomerIDList = new ArrayList<>();
+        int foundCount = 0;
+
+        for (int i = 0; i < customersList.size(); i++) {
+            if(customersList.get(i).toLowerCase().contains(searchTerm.toLowerCase())){
+                newCustomerList.add(customersList.get(i));
+                newCustomerIDList.add(customersIDList.get(i));
+                foundCount++;
+            }
+        }
+
+        customerCountText.setText(String.valueOf(foundCount));
+        customersList = newCustomerList;
+        customersIDList = newCustomerIDList;
+        setCustomersPage(0);
+    }
+
+    /**
+     * Nollaa asiakkaiden haun
+     */
+    private void resetSearchCustomers(){
+        fetchCustomerNames();
+        searchTextField.setText("");
+        setCustomersPage(0);
+    }
+
+
+    /**
+     * Hakee mökkien listasta vain haetut mökit
+     */
+    private void filterSearchCottages(){
+        fetchCottageNames();
+
+        String searchTerm = cottageSearchTextField.getText();
+        ObservableList<String> newCottageList = FXCollections.observableArrayList();
+        ArrayList<String> newCottageIDList = new ArrayList<>();
+        int foundCount = 0;
+
+        for (int i = 0; i < cottageList.size(); i++) {
+            if(cottageList.get(i).toLowerCase().contains(searchTerm.toLowerCase())){
+                newCottageList.add(cottageList.get(i));
+                newCottageIDList.add(cottageIDList.get(i));
+                foundCount++;
+            }
+        }
+
+        cottageCountText.setText(String.valueOf(foundCount));
+        cottageList = newCottageList;
+        cottageIDList = newCottageIDList;
+        setCottagePage(0);
+    }
+
+    /**
+     * Nollaa asiakkaiden haun
+     */
+    private void resetSearchCottages(){
+        fetchCottageNames();
+        cottageSearchTextField.setText("");
+        setCottagePage(0);
+    }
+
+    /**
+     * Hakee raportoinnin, joko kaikille mökeille tai tietylle mökille
+     */
     private void getReportInfo(){
         VarausDAO varausDAO = new VarausDAO();
         if(reportAllRadioButton.isSelected()){
@@ -493,7 +574,6 @@ public class MainApplication extends Application {
         AsiakasDAO asiakasDAO = new AsiakasDAO();
         asiakasDAO.poistaAsiakas(currentCustomer.getAsiakasId());
         setCustomersPage(currentCustomerPage);
-        System.out.println("asiakas poistettu...");
     }
 
 
@@ -507,7 +587,6 @@ public class MainApplication extends Application {
         MokkiDAO mokkiDAO = new MokkiDAO();
         mokkiDAO.poistaMokki(currentCottage.getMokkiId());
         setCottagePage(currentCottagePage);
-        System.out.println("mökki poistettu...");
     }
 
 
@@ -519,7 +598,6 @@ public class MainApplication extends Application {
         VarausDAO varausDAO = new VarausDAO();
         varausDAO.poistaVaraus(Integer.parseInt(reservationIDList.get(reservationsListView.getSelectionModel().getSelectedIndex())));
         refreshReservationsList();
-        System.out.println("varaus poistettu...");
     }
 
     /**
@@ -649,11 +727,6 @@ public class MainApplication extends Application {
     @Override
     public void start(Stage stage) {
 
-        //hakee ensin tietokannasta varaukset ja asiakkaat
-        fetchInvoiceIDs();
-        fetchCustomerNames();
-        fetchCottageNames();
-        fetchAllReservationsCount();
 
         //pääpane
         Pane mainPane = new Pane();
@@ -881,9 +954,10 @@ public class MainApplication extends Application {
         customersGridPane.setVgap(15);
         customersGridPane.setHgap(15);
 
-        TextField searchTextField = new TextField();
-        Text customerCountText = new Text("{henkilömäärä}");
+        searchTextField = new TextField();
+        customerCountText = new Text("{henkilömäärä}");
         Button customerSearchButton = new Button("Hae");
+        Button resetSearchCustomersButton = new Button("Nollaa haku");
 
         Button previousPageButton = new Button("Edellinen sivu");
         Button nextPageButton = new Button("Seuraava sivu");
@@ -907,6 +981,7 @@ public class MainApplication extends Application {
         customerSearchGridPane.add(searchTextField, 0, 0);
         customerSearchGridPane.add(customerCountText, 1, 0);
         customerSearchGridPane.add(customerSearchButton, 2, 0);
+        customerSearchGridPane.add(resetSearchCustomersButton, 3, 0);
 
         customerSearchGridPane.setHgap(15);
         BorderPane.setMargin(customersGridPane, new Insets(15));
@@ -1216,9 +1291,10 @@ public class MainApplication extends Application {
         cottagesGridPane.add(cottage9Pane, 2, 2);
 
         //mökkien haku
-        TextField cottageSearchTextField = new TextField();
-        Text cottageCountText = new Text("{henkilömäärä}");
+        cottageSearchTextField = new TextField();
+        cottageCountText = new Text("{henkilömäärä}");
         Button cottageSearchButton = new Button("Hae");
+        Button resetCottageSearchButton = new Button("Nollaa haku");
 
         Button previousCottagePageButton = new Button("Edellinen sivu");
         Button nextCottagePageButton = new Button("Seuraava sivu");
@@ -1242,6 +1318,7 @@ public class MainApplication extends Application {
         cottageSearchGridPane.add(cottageSearchTextField, 0, 0);
         cottageSearchGridPane.add(cottageCountText, 1, 0);
         cottageSearchGridPane.add(cottageSearchButton, 2, 0);
+        cottageSearchGridPane.add(resetCottageSearchButton, 3, 0);
 
         cottageSearchGridPane.setHgap(15);
         BorderPane.setMargin(cottagesGridPane, new Insets(15));
@@ -1822,6 +1899,15 @@ public class MainApplication extends Application {
             mainMenu.setVisible(true);
         });
 
+        customerSearchButton.setOnAction(e->{
+            filterSearchCustomers();
+        });
+
+        resetSearchCustomersButton.setOnAction(e->{
+            resetSearchCustomers();
+        });
+
+
         cottageInfoBackButton.setOnAction(e->{
             cottageInfo.setVisible(false);
             cottages.setVisible(true);
@@ -1879,6 +1965,14 @@ public class MainApplication extends Application {
             cottageInfo.setVisible(true);
             fetchCottageInfoFromID(fetchSelectedCottageId(6));
             refreshReservationsList();
+        });
+
+        cottageSearchButton.setOnAction(e->{
+            filterSearchCottages();
+        });
+
+        resetCottageSearchButton.setOnAction(e->{
+            resetSearchCottages();
         });
 
         createReservationButton.setOnAction(e->{
@@ -1996,6 +2090,12 @@ public class MainApplication extends Application {
             getReportInfo();
         });
 
+
+        //hakee tietokannasta varaukset, mökit, laskut ja asiakkaat
+        fetchInvoiceIDs();
+        fetchCustomerNames();
+        fetchCottageNames();
+        fetchAllReservationsCount();
 
         setCustomersPage(0);
         setCottagePage(0);
